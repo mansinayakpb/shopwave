@@ -1,0 +1,15 @@
+{% extends 'stores/base.html' %}
+{% block content %}
+<h2>Categories</h2>
+<a href="{% url 'category_create' %}">Add Category</a>
+<ul>
+    {% for category in categories %}
+    <li>
+        {{ category.name }}
+        <a href="{% url 'category_update' category.pk %}">Edit</a>
+        <a href="{% url 'category_delete' category.pk %}">Delete</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
