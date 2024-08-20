@@ -11,6 +11,81 @@
         <aside class="col-md-6">
             <article class="gallery-wrap">
                 <div class="img-big-wrap">
+                    {% if product.image %}
+                        <a href="#"><img src="{{ product.image.url }}" alt="Product Image"></a>
+                    {% else %}
+                        <a href="#"><img src="{% static 'images/placeholder.jpg' %}" alt="Placeholder Image"></a>
+                    {% endif %}
+                </div> <!-- img-big-wrap.// -->
+            </article> <!-- gallery-wrap .end// -->
+        </aside>
+        <main class="col-md-6 border-left">
+            <article class="content-body">
+                <h2 class="title">{{ product.name }}</h2>
+                <div class="mb-3">
+                    <var class="price h4">₹{{ product.price }}</var>
+                </div>
+                <p>{{ product.description }}</p>
+                <hr>
+                <div class="row">
+                    <div class="item-option-select">
+                        <h6>Choose Color</h6>
+                        <!-- Add color options here -->
+                    </div>
+                </div> <!-- row.// -->
+                <div class="row">
+                    <div class="item-option-select">
+                        <h6>Select Size</h6>
+                        <!-- Add size options here -->
+                    </div>
+                </div> <!-- row.// -->
+                <hr>
+                <a href="#" class="btn btn-primary">
+                    <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>
+                </a>
+            </article> <!-- product-info-aside .// -->
+        </main> <!-- col.// -->
+    </div> <!-- row.// -->
+</div> <!-- card.// -->
+<!-- ============================ COMPONENT 1 END .// ================================= -->
+
+<br>
+
+<div class="row">
+    <div class="col-md-9">
+        <header class="section-heading">
+            <h3>Customer Reviews</h3>
+        </header>
+        <article class="box mb-3">
+            <!-- Add customer reviews here -->
+        </article>
+    </div> <!-- col.// -->
+</div> <!-- row.// -->
+
+</div> <!-- container .// -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+
+{% endblock body_content %}
+
+
+
+
+
+
+{% comment %} {% extends "product-detail/base_product.html" %}
+{% load static %}
+{% block body_content %}
+
+<section class="section-content padding-y bg">
+<div class="container">
+
+<!-- ============================ COMPONENT 1 ================================= -->
+<div class="card">
+    <div class="row no-gutters">
+        <aside class="col-md-6">
+            <article class="gallery-wrap">
+                <div class="img-big-wrap">
                     <a href="#"><img src="{% static 'images/items/12.jpg' %}" alt="Product Image"></a>
                 </div> <!-- img-big-wrap.// -->
             </article> <!-- gallery-wrap .end// -->
@@ -95,8 +170,10 @@
 
 </div> <!-- container .// -->
 </section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
+<!-- ========================= SECTION CONTENT END// ========================= --> {% endcomment %}
 
 
 
-{% endblock body_content %}
+{% comment %} {% endblock body_content %} {% endcomment %}
+
+
