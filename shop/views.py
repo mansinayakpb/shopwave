@@ -15,8 +15,12 @@ class Home(TemplateView):
     template_name = 'home.html'
 
     def get(self, request):
-        categories = Category.objects.all()  # Fetch all categories from the database
-        context = {'categories': categories}
+        categories = Category.objects.all()
+        products = Product.objects.all()
+        context = {
+            'categories': categories,
+            'products': products
+        }
         return render(request, self.template_name, context)
 
 
@@ -39,7 +43,35 @@ class StoreView(TemplateView):
             'products': products
         }
         return render(request, self.template_name, context)
-
+    
 
 class ProductView(TemplateView):
     template_name = 'product-detail/product.html'
+
+    def get(self, request, product_name=None):
+        try:
+            product = Product.objects.get(product_name=product_name)
+        except Product.DoesNotExist:
+            product = Product.objects.none()
+        
+        context = {
+            'product': product,
+        }
+        return render(request, self.template_name, context)
+
+
+# class ProductView(TemplateView):
+#     template_name = 'product-detail/product.html'
+
+#     def get(self, request, **kwargs):
+#         product_name = kwargs.get('product_name')
+#         try:
+#             product = Product.objects.get(product_name=product_name)
+#         except Product.DoesNotExist:
+#             product = None
+        
+#         context = {
+#             'product': product,
+#         }
+#         return render(request, self.template_name, context)
+
