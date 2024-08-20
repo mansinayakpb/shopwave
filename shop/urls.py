@@ -8,11 +8,9 @@ urlpatterns = [
     path('store/', StoreView.as_view(), name='storeview'),
     path('store/<str:category_name>/', StoreView.as_view(), name='product_by_category_name'),
     path('store/<str:category_name>/product-detail/<str:product_name>/', ProductView.as_view(), name='product_by_category'),
-    
-    
-    
-]
+    path('product/<str:product_name>', ProductView.as_view(), name='product_detail'),
 
+]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
