@@ -36,12 +36,45 @@
                 <div class="row">
                     <div class="item-option-select">
                         <h6>Select Size</h6>
+                        <article class="filter-group">
+                            <header class="card-header">
+                                <a href="#" data-toggle="collapse" data-target="#collapse_4" aria-expanded="true" class="">
+                                    <i class="icon-control fa fa-chevron-down"></i>
+                                    <h6 class="title">Sizes </h6>
+                                </a>
+                            </header>
+                            <div class="filter-content collapse show" id="collapse_4" style="">
+                                <div class="card-body">
+                                  <label class="checkbox-btn">
+                                    <input type="checkbox">
+                                    <span class="btn btn-light"> S </span>
+                                  </label>
+                    
+                                  <label class="checkbox-btn">
+                                    <input type="checkbox">
+                                    <span class="btn btn-light"> M </span>
+                                  </label>
+                    
+                                  <label class="checkbox-btn">
+                                    <input type="checkbox">
+                                    <span class="btn btn-light"> L </span>
+                                  </label>
+                    
+                                  <label class="checkbox-btn">
+                                    <input type="checkbox">
+                                    <span class="btn btn-light"> XL </span>
+                                  </label>
+                            </div><!-- card-body.// -->
+                            </div>
+                        </article> <!-- filter-group .// -->
                         <!-- Add size options here -->
                     </div>
                 </div> <!-- row.// -->
                 <hr>
-                <a href="#" class="btn btn-primary">
+                <a href="{% url 'cart_view' %}" class="btn btn-primary">
                     <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>
+            {% comment %} <a href="{% url 'storeview' %}" class="btn btn-outline-primary float-right">Store</a> {% endcomment %}
+
                 </a>
             </article> <!-- product-info-aside .// -->
         </main> <!-- col.// -->
@@ -67,9 +100,4 @@
 <!-- ========================= SECTION CONTENT END// ========================= -->
 
 {% endblock body_content %}
-
-
-
-
-
 

@@ -37,12 +37,6 @@
                         <i class="fa fa-bars"></i> All category
                     </button>
                     <div class="dropdown-menu">
-                        <!-- <a class="dropdown-item" href="#">Machinery / Mechanical Parts / Tools </a>
-                        <a class="dropdown-item" href="#">Consumer Electronics / Home Appliances </a>
-                        <a class="dropdown-item" href="#">Auto / Transportation</a>
-                        <a class="dropdown-item" href="#">Apparel / Textiles / Timepieces </a>
-                        <a class="dropdown-item" href="#">Home & Garden / Construction / Lights </a>
-                        <a class="dropdown-item" href="#">Beauty & Personal Care / Health </a> -->
                         <ul class="list-menu">
                             {% for category in categories %}
                                 <li><a class="dropdown-item" href="{% url 'product_by_category_name' category.category_name %}">{{ category.category_name }}</a></li>
@@ -52,7 +46,8 @@
                 </div>  <!-- category-wrap.// -->
             </div> <!-- col.// -->
     
-            <a href="stores/store.html" class="btn btn-outline-primary">Store</a>
+            {% comment %} <a href="stores/store.html" class="btn btn-outline-primary">Store</a> {% endcomment %}
+            <a href="{% url 'storeview' %}" class="btn btn-outline-primary float-right">Store</a>
             <div class="col-lg  col-md-6 col-sm-12 col">
                 <form action="#" class="search">
                     <div class="input-group w-100">
