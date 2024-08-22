@@ -1,8 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.views.generic import TemplateView
 from .models import Category, Product, Cart, CartItem
-from .forms import SignUpForm, CategoryForm, ProductForm
+from .forms import SignUpForm
 from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login, logout
+
 
 # class Home(TemplateView):
 #     template_name = "home.html"
@@ -25,7 +28,7 @@ class Home(TemplateView):
 
 
 class StoreView(TemplateView):
-    template_name = 'stores/store.html'
+    template_name = 'store.html'
 
     def get(self, request, category_name=None):
         categories = Category.objects.all()
@@ -44,9 +47,9 @@ class StoreView(TemplateView):
         }
         return render(request, self.template_name, context)
     
-
+    
 class ProductView(TemplateView):
-    template_name = 'product-detail/product.html'
+    template_name = 'product.html'
 
     def get(self, request, product_name=None):
         try:
@@ -60,8 +63,50 @@ class ProductView(TemplateView):
         return render(request, self.template_name, context)
 
 
+# class StoreView(TemplateView):
+#     template_name = 'store.html'
+
+#     def get(self, request, pk=None):
+#         categories = Category.objects.all()
+#         products = Product.objects.all()
+
+#         if pk:
+#             try:
+#                 category = Category.objects.get(id=pk)
+#                 products = Product.objects.filter(category=category)
+#             except Category.DoesNotExist:
+#                 products = Product.objects.none()
+
+#         context = {
+#             'categories': categories,
+#             'products': products
+#         }
+#         return render(request, self.template_name, context)
+    
+
+# class ProductView(TemplateView):
+#     template_name = 'product.html'
+
+#     def get(self, request, category_pk=None, product_pk=None):
+#         try:
+#             category = Category.objects.get(id=category_pk)
+#             product = Product.objects.get(id=product_pk, category=category)
+#         except (Category.DoesNotExist, Product.DoesNotExist):
+#             category = None
+#             product = None
+
+#         context = {
+#             'category': category,
+#             'product': product,
+#         }
+
+#         return render(request, self.template_name, context)
+
+
+
+
 class CartView(TemplateView):
-    template_name = 'cart/cart.html'
+    template_name = 'cart.html'
 
     def get(self, request):
         cart = None
@@ -79,43 +124,89 @@ class CartView(TemplateView):
         }
         return render(request, self.template_name, context)
 
+
 # SIGNUP
 
 
-class SignUpView(TemplateView):
-    def get(self, request):
-        if request.user.is_authenticated:
-            return redirect('/')
-        form = SignUpForm()
-        return render(request, 'signin/signin.html', {'form': form})
+# class SignUpView(TemplateView):
+#     template_name = 'signin/signin2.html'
+#     # def get(self, request):
+#     #     if request.user.is_authenticated:
+#     #         return redirect('/')
+#     #     form = SignUpForm()
+#     #     return render(request, 'signin/signin2.html', {'form': form})
     
+#     def post(self, request):
+#         if request.user.is_authenticated:
+#             return redirect('/')
+#         form = SignUpForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Account Created Successfully!")
+#             return redirect('/')
+#         return render(request, self.template_name, {'form': form})
+
+class SignUpView(TemplateView):
+    template_name = 'signin/signin2.html'
+
     def post(self, request):
         if request.user.is_authenticated:
             return redirect('/')
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Account Created Successfully!")
-            return redirect('/')
-        return render(request, 'signin/signin.html', {'form': form})
+        
+        # Handle GET request when there's no POST data
+        if request.method == 'GET':
+            form = SignUpForm()
+        else:
+            form = SignUpForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Account Created Successfully!")
+                return redirect('/')
+
+        return render(request, self.template_name, {'form': form})
 
 
-    
+
+
+# Login
+
+
+def user_login(request):
+    if not request.user.is_authenticated:
+        if request.method == "POST":
+            form = AuthenticationForm(request=request, data=request.POST)
+            if form.is_valid():
+                user_name = form.cleaned_data['username']
+                user_pass = form.cleaned_data['password']
+                user = authenticate(username=user_name, password=user_pass)
+                if user is not None:
+                    login(request, user)
+                    messages.success(request, 'Logged in Successfully')
+                    return redirect('/profile/')
+                else:
+                    form.add_error(None, 'Invalid username or password')
+        else:
+            form = AuthenticationForm()
+        return render(request, 'signin/userlogin.html', {'form': form})
+    else:
+        return HttpResponseRedirect('/profile/')
+
+
+# profile
+
+
+def user_profile(request):
+    if request.user.is_authenticated:
+        return render(request, 'signin/profile.html', {'name': request.user})
+    else:
+        return HttpResponseRedirect('/login/')
+
+# logout
+
+
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect('/login/')
 
 
 
-
-
-
-# def sign_up(request):
-#     if request.user.is_authenticated:
-#         return redirect('/')
-#     if request.method == "POST":
-#         form = SignUpForm(request.POST)
-#         if form.is_valid():
-#             messages.success(request, "Account Created Successfully!!")
-#             form.save()
-#     else:
-#         form = SignUpForm()
-#     return render(request, 'enroll/signup.html', {'form': form})
-    
