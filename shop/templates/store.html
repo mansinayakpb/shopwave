@@ -1,4 +1,4 @@
-{% extends "stores/base_store.html" %}
+{% extends "base.html" %}
 {% load static %}
 {% block body_content %}
 <!-- ========================= SECTION PAGETOP ========================= -->
@@ -30,6 +30,8 @@
 				<ul class="list-menu">
 					{% for category in categories %}
 						<li><a href="{% url 'product_by_category_name' category.category_name %}">{{ category.category_name }}</a></li>
+						{% comment %} <li><a href="{% url 'product_by_category_name' category.pk %}">{{ category.pk }}</a></li> {% endcomment %}
+					    
 					{% endfor %}
 				</ul>
 				
@@ -139,6 +141,8 @@
 			<figcaption class="info-wrap">
 				<div class="fix-height">
 					<a href="{% url 'product_detail' product.product_name %}" class="title">{{ product.product_name }}</a>
+					{% comment %} <a href="{% url 'product_detail' product.pk %}" class="title">{{ product.pk }}</a> {% endcomment %}
+					
 					{% comment %} <a href="product-detail/product.html" class="title">{{ product.product_name }}</a> {% endcomment %}
 					<div class="price-wrap mt-2">
 						<span class="price">₹{{ product.price }}</span>

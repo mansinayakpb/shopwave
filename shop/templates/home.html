@@ -45,14 +45,22 @@
             <div class="col-md-3">
                 <div class="card card-product-grid">
                     <a href="{% url 'product_detail' product.product_name %}" class="img-wrap">
-                        {% if product.image %}
+                    {% comment %} <a href="{% url 'product_detail' %}" class="img-wrap"> {% endcomment %}
+
+                        {% comment %} <a href="{% url 'product_detail' product.pk %}" class="img-wrap"> {% endcomment %}
+                        
+                    {% if product.image %}
                             <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+                            {% comment %} <img src="{{ product.image.url }}" alt="{{ product.pk }}"> {% endcomment %}
+
                         {% else %}
                             <img src="{% static 'images/placeholder.jpg' %}" alt="Placeholder Image">
                         {% endif %}
                     </a>
                     <figcaption class="info-wrap">
                         <a href="{% url 'product_detail' product.product_name %}" class="title">{{ product.product_name }}</a>
+                        {% comment %} <a href="{% url 'product_detail' product.pk %}" class="title">{{ product.pk }}</a> {% endcomment %}
+                    
                         <div class="price mt-1">₹{{ product.price }}</div>
                     </figcaption>
                 </div>

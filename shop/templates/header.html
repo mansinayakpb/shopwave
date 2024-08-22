@@ -38,9 +38,15 @@
                     </button>
                     <div class="dropdown-menu">
                         <ul class="list-menu">
-                            {% for category in categories %}
-                                <li><a class="dropdown-item" href="{% url 'product_by_category_name' category.category_name %}">{{ category.category_name }}</a></li>
+                            {% for category in categories %}                                    
+                            <li><a class="dropdown-item" href="{% url 'product_by_category_name' category.category_name %}">{{ category.category_name }}</a></li>
                             {% endfor %}
+                        </ul>
+                        {% comment %} <ul class="list-menu">
+                            {% for category in categories %}
+                                <li><a class="dropdown-item" href="{% url 'product_by_category_name' category.pk %}">{{ category.pk }}</a>
+                                </a></li>
+                            {% endfor %} {% endcomment %}
                         </ul>
                     </div>
                 </div>  <!-- category-wrap.// -->
@@ -66,7 +72,7 @@
                             <div class="widget-header">
                                 <small class="title text-muted">Welcome guest!</small>
                                 <div>
-                                    <a href="./signin.html">Sign in</a> <span class="dark-transp"> | </span>
+                                    <a href="{% url 'signin' %}">Sign in</a> <span class="dark-transp"> | </span>
                                     <a href="./register.html"> Register</a>
                                 </div>
                             </div>
