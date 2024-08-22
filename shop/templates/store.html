@@ -128,30 +128,31 @@
 <div class="row">
 	{% for product in products%}
 	<div class="col-md-4">
-		<figure class="card card-product-grid">
-			<div class="img-wrap">
+		<a href="{% url 'product_detail' product.product_name %}" class="title">{{ product.product_name }}
+			<figure class="card card-product-grid">
+				<div class="img-wrap">
 
-				{% comment %} <img src="{{ product.image.url }}"> {% endcomment %}
-				{% if product.image %}
-				    <img src="{{ product.image.url }}" alt="Product Image">
-				{% else %}
-				    <img src="{% static 'images/placeholder.jpg' %}" alt="Placeholder Image">
-				{% endif %}
-			</div> <!-- img-wrap.// -->
-			<figcaption class="info-wrap">
-				<div class="fix-height">
-					<a href="{% url 'product_detail' product.product_name %}" class="title">{{ product.product_name }}</a>
-					{% comment %} <a href="{% url 'product_detail' product.pk %}" class="title">{{ product.pk }}</a> {% endcomment %}
-					
-					{% comment %} <a href="product-detail/product.html" class="title">{{ product.product_name }}</a> {% endcomment %}
-					<div class="price-wrap mt-2">
-						<span class="price">₹{{ product.price }}</span>
-						 {% comment %} <del class="price-old">$1980</del> {% endcomment %}
-					</div> <!-- price-wrap.// -->
-				</div>
-				<a href="#" class="btn btn-block btn-success">Added to cart </a>
-			</figcaption>
-		</figure>
+					{% comment %} <img src="{{ product.image.url }}"> {% endcomment %}
+					{% if product.image %}
+						<img src="{{ product.image.url }}" alt="Product Image">
+					{% else %}
+						<img src="{% static 'images/placeholder.jpg' %}" alt="Placeholder Image">
+					{% endif %}
+				</div> <!-- img-wrap.// -->
+				<figcaption class="info-wrap">
+					<div class="fix-height">
+						{% comment %} <a href="{% url 'product_detail' product.pk %}" class="title">{{ product.pk }}</a> {% endcomment %}
+						
+						{% comment %} <a href="product-detail/product.html" class="title">{{ product.product_name }}</a> {% endcomment %}
+						<div class="price-wrap mt-2">
+							<span class="price">₹{{ product.price }}</span>
+							{% comment %} <del class="price-old">$1980</del> {% endcomment %}
+						</div> <!-- price-wrap.// -->
+					</div>
+					<a href="#" class="btn btn-block btn-success">Added to cart </a>
+				</figcaption>
+			</figure>
+		</a>
 	</div> <!-- col.// -->
 	{% endfor %}
 
