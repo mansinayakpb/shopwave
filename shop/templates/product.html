@@ -2,11 +2,11 @@
 {% load static %}
 {% block body_content %}
 
-<section class="section-content padding-y bg">
-<div class="container">
+{% comment %} <section class="section-content padding-y bg">
+<div class="container"> {% endcomment %}
 
 <!-- ============================ COMPONENT 1 ================================= -->
-<div class="card">
+{% comment %} <div class="card">
     <div class="row no-gutters">
         <aside class="col-md-6">
             <article class="gallery-wrap">
@@ -72,10 +72,10 @@
                 </div> <!-- row.// -->
                 <hr>
                 <a href="{% url 'cart_view' %}" class="btn btn-primary">
-                    <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>
+                    <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i> {% endcomment %}
             {% comment %} <a href="{% url 'storeview' %}" class="btn btn-outline-primary float-right">Store</a> {% endcomment %}
 
-                </a>
+                {% comment %} </a>
             </article> <!-- product-info-aside .// -->
         </main> <!-- col.// -->
     </div> <!-- row.// -->
@@ -96,8 +96,32 @@
 </div> <!-- row.// -->
 
 </div> <!-- container .// -->
-</section>
+</section> {% endcomment %}
 <!-- ========================= SECTION CONTENT END// ========================= -->
 
+
+
+<!-- ========================= PRODUCT DETAILS ========================= -->
+<section class="section-product-detail padding-y-sm">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <img src="{{ product.image.url }}" alt="{{ product.product_name }}" class="img-fluid">
+            </div>
+            <div class="col-md-6">
+                <h1>{{ product.product_name }}</h1>
+                <p>{{ product.description }}</p>
+                <p>Price: ₹{{ product.price }}</p>
+                <p>Stock: {{ product.stock }}</p>
+                <button class="btn btn-primary">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ========================= PRODUCT DETAILS END ========================= -->
+
 {% endblock body_content %}
+
+
+
 

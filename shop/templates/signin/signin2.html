@@ -1,6 +1,6 @@
 {% extends "signin/base_signin.html" %}
 {% load static %}
-{% block body_content %}
+{% block body_content %} 
 
 <!-- ========================= SECTION CONTENT ========================= -->
 <section class="section-content padding-y" style="min-height:84vh; background: linear-gradient(135deg, #f06, #f93);">
@@ -81,3 +81,40 @@
 {% endblock body_content%}
 </body>
 </html>  {% endcomment %}
+
+
+{% comment %} <!DOCTYPE html>
+<html lang='en'>
+<head>
+    <style>
+        .info{
+            color:darkgreen;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>User Registration</title>
+</head>
+<body>
+<form action="" method="post" novalidate>
+  {% csrf_token %}
+   {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+    <p class="er">{{error}}</p>
+    {% endfor %}
+   {% endif%}
+  {% for form in form %}
+    {{form.label_tag}} {{form}} {{form.errors|striptags}} <br><br>
+  {% endfor %}
+  <input type="submit" value="Submit">
+</form>
+ {% if messages %}
+    {% for message in messages %}
+        <span {% if message.tags %} class="{{message.tags}}" {% endif %}>{{message}}</span>
+    {% endfor %}
+ {% endif %}
+ <a href="{% url 'login' %}">Login</a>
+</body>
+</html> {% endcomment %}
+
+{% comment %} {% endblock body_content %} {% endcomment %}
