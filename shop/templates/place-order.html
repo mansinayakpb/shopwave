@@ -1,13 +1,10 @@
-{% extends "base.html" %%}
+{% extends "base.html" %}
 {% load static %}
 {% block body_content %}
 
 <section class="section-content padding-y bg">
 <div class="container">
 
-
-
-<!-- ============================ COMPONENT 2 ================================= -->
 <div class="row">
 		<main class="col-md-8">
 
@@ -15,27 +12,31 @@
 <div class="card-body">
 	<h4 class="card-title mb-4">Review cart</h4>
 	<div class="row">
-		<div class="col-md-6">
-			<figure class="itemside  mb-4">
-				<div class="aside"><img src="./images/items/1.jpg" class="border img-sm"></div>
-				<figcaption class="info">
-					<p>Apple iPad (2019) 32Gb Wi-Fi gold </p>
-					<span class="text-muted">2x = $560 </span>
-				</figcaption>
-			</figure>
-		</div> <!-- col.// -->
-	</div> <!-- row.// -->
-</div> <!-- card-body.// -->
-</article> <!-- card.// -->
 
+{% for item in cart_items %}
+    <div class="col-md-6">
+        <figure class="itemside mb-4">
+            <div class="aside">
+                <img src="{{ item.product.image.url }}" class="border img-sm">
+            </div>
+            <figcaption class="info">
+                <p>{{ item.product.product_name }}</p>
+                <span class="text-muted">{{ item.product.price }}</span>
+            </figcaption>
+        </figure>
+    </div> <!-- col.// -->
+{% empty %}
+    <p>No items in the cart.</p>
+{% endfor %}
 
 <article class="card mb-4">
 <div class="card-body">
 	<h4 class="card-title mb-4">Contact info</h4>
-	<form action="">
+	<form action="{% url 'order_place' %}" method="post">
+		{% csrf_token %}
 		<div class="row">
 			<div class="form-group col-sm-6">
-				<label>Frst name</label>
+				<label>First name</label>
 				<input type="text" placeholder="Type here" class="form-control">
 			</div>
 			<div class="form-group col-sm-6">
@@ -51,73 +52,66 @@
 				<input type="email" placeholder="example@gmail.com" class="form-control">
 			</div>
 		</div> <!-- row.// -->
-	</form>
 </div> <!-- card-body.// -->
 </article> <!-- card.// -->
-
 
 <article class="card mb-4">
 <div class="card-body">
 	<h4 class="card-title mb-4">Delivery info</h4>
-	<form action="">
-
 
 		<div class="row">
 				<div class="form-group col-sm-6">
 					<label>Country*</label>
-					<select name="" class="form-control">
-						<option value="">India</option>
-						<option value="">United States</option>
-						<option value="">France</option>
-						<option value="">Italy</option>
+					<select name="country" class="form-control">
+						<option value="India">India</option>
+						<option value="United States">United States</option>
+						<option value="France">France</option>
+						<option value="Italy">Italy</option>
 					</select>
 				</div>
 				<div class="form-group col-sm-6">
 					<label>State*</label>
-					<input type="text" placeholder="Type here" class="form-control">
+					<input type="text" name="state" placeholder="Type here" class="form-control">
 				</div>
 				<div class="form-group col-sm-8">
 					<label>Street*</label>
-					<input type="text" placeholder="Type here" class="form-control">
+					<input type="text" name="street" placeholder="Type here" class="form-control">
 				</div>
 				<div class="form-group col-sm-4">
 					<label>Building</label>
-					<input type="text" placeholder="" class="form-control">
+					<input type="text" name="building" placeholder="" class="form-control">
 				</div>
 				<div class="form-group col-sm-4">
 					<label>House</label>
-					<input type="text" placeholder="Type here" class="form-control">
+					<input type="text" name="house" placeholder="Type here" class="form-control">
 				</div>
 				<div class="form-group col-sm-4">
 					<label>Postal code</label>
-					<input type="text" placeholder="" class="form-control">
+					<input type="text" name="postal_code" placeholder="" class="form-control">
 				</div>
 				<div class="form-group col-sm-4">
 					<label>Zip</label>
-					<input type="text" placeholder="" class="form-control">
+					<input type="text" name="zip" placeholder="" class="form-control">
 				</div>
 		</div> <!-- row.// -->
 	</form>
 </div> <!-- card-body.// -->
 </article> <!-- card.// -->
 
-
 <article class="accordion" id="accordion_pay">
 	<div class="card">
 		<header class="card-header">
-			<img src="./images/misc/payment-paypal.png" class="float-right" height="24">
+			<img src="{% static './images/misc/payment-paypal.png' %}" class="float-right" height="24">
 			<label class="form-check collapsed" data-toggle="collapse" data-target="#pay_paynet">
-				<input class="form-check-input" name="payment-option" checked type="radio" value="option2">
-				<h6 class="form-check-label">
-					Paypal
-				</h6>
+				<input class="form-check-input" name="payment-option" checked type="radio" value="paypal">
+				<h6 class="form-check-label"> Paypal </h6>
 			</label>
 		</header>
 		<div id="pay_paynet" class="collapse show" data-parent="#accordion_pay">
 		<div class="card-body">
 			<p class="text-center text-muted">Connect your PayPal account and use it to pay your bills. You'll be redirected to PayPal to add your billing information.</p>
 			<p class="text-center">
-				<a href="#"><img src="./images/misc/btn-paypal.png" height="32"></a>
+				<a href="#"><img src="{% static './images/misc/btn-paypal.png' %}" height="32"></a>
 				<br><br>
 			</p>
 		</div> <!-- card body .// -->
@@ -125,9 +119,9 @@
 	</div> <!-- card.// -->
 	<div class="card">
 	<header class="card-header">
-		<img src="./images/misc/payment-card.png" class="float-right" height="24">
+		<img src="{% static './images/misc/payment-card.png' %}" class="float-right" height="24">
 		<label class="form-check" data-toggle="collapse" data-target="#pay_payme">
-			<input class="form-check-input" name="payment-option" type="radio" value="option2">
+			<input class="form-check-input" name="payment-option" type="radio" value="credit_card">
 			<h6 class="form-check-label"> Credit Card  </h6>
 		</label>
 	</header>
@@ -135,10 +129,10 @@
 		<div class="card-body">
 			<p class="alert alert-success">Some information or instruction</p>
 			<form class="form-inline">
-				<input type="text" class="form-control mr-2" placeholder="xxxx-xxxx-xxxx-xxxx" name="">
-				<input type="text" class="form-control mr-2" style="width: 100px"  placeholder="dd/yy" name="">
-				<input type="number" maxlength="3" class="form-control mr-2"  style="width: 100px"  placeholder="cvc" name="">
-				<button class="btn btn btn-success">Button</button>
+				<input type="text" class="form-control mr-2" placeholder="xxxx-xxxx-xxxx-xxxx" name="card_number">
+				<input type="text" class="form-control mr-2" style="width: 100px"  placeholder="dd/yy" name="expiry_date">
+				<input type="number" maxlength="3" class="form-control mr-2"  style="width: 100px"  placeholder="cvc" name="cvc">
+				<button type="submit" class="btn btn btn-success">Place Order</button>
 			</form>
 		</div> <!-- card body .// -->
 	</div> <!-- collapse .// -->
@@ -153,22 +147,21 @@
 		<div class="card-body">
 			<dl class="dlist-align">
 			  <dt>Total price:</dt>
-			  <dd class="text-right">$69.97</dd>
+			  <dd class="text-right">{{ total_price }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Tax:</dt>
-			  <dd class="text-right"> $10.00</dd>
+			  <dd class="text-right">{{ tax }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Total:</dt>
-			  <dd class="text-right text-dark b"><strong>$59.97</strong></dd>
+			  <dd class="text-right text-dark b"><strong>{{ final_total }}</strong></dd>
 			</dl>
 			<hr>
 			<p class="text-center mb-3">
 				<img src="{% static './images/misc/payments.png' %}" height="26">
 			</p>
-			<a href="./place-order.html" class="btn btn-primary btn-block"> Place Order </a>
-
+			<button type="submit" class="btn btn-primary btn-block"> Place Order </button>
 		</div> <!-- card-body.// -->
 		</div> <!-- card.// -->
 		</aside> <!-- col.// -->
@@ -176,14 +169,9 @@
 
 <!-- ============================ COMPONENT 2 END//  ================================= -->
 
-
-
+{% endblock body_content %}
 
 </div> <!-- container .//  -->
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
 
-
-<!-- ========================= SECTION CONTENT END// ========================= -->
-</body>
-</html>

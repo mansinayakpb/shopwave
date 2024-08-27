@@ -1,11 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'seller/base_seller.html' %}
 {% load static %}
 {% block body_content %}
 
-    <div class="container mt-5" style="background: linear-gradient(135deg, #e0f7fa, #b3e5fc); " >
+    <div class="container mt-5" style="background: linear-gradient(135deg, #ffcccc, #ff9999);" >
         <h2 class="mb-4">Profile Form</h2>
         <!-- Dynamic form action URL based on the view -->
-        <form action="{% url form_action %}" method="POST"> 
+        <form action="{% url 'seller_profile' %}" method="POST"> 
             {% csrf_token %}
             <div class="mb-3">
                 <label for="first_name" class="form-label">First Name</label>
