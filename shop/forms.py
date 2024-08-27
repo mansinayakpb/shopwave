@@ -53,16 +53,10 @@ class CartItemForm(forms.ModelForm):
 
 
 class SignUpForm(UserCreationForm):
-    first_name = forms.CharField(max_length=30, required=True, label='First Name')
-    last_name = forms.CharField(max_length=30, required=True, label='Last Name')
-    password2 = forms.CharField(
-        label='Confirm Password (again)',
-        widget=forms.PasswordInput
-    )
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'user_type']
+        fields = ['first_name', 'last_name', 'email', 'user_type', 'password1', 'password2']
         labels = {
             'email': 'Email',
             'user_type': 'Account Type',
@@ -81,3 +75,16 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
         fields = ("email",)
+
+
+class BuyerForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ("user", "phone_number", "country", "state", "city", "address_line_1")
+
+
+class SellerForm(forms.ModelForm):
+
+    class Meta:
+        model = Profile
+        fields = ("user", "phone_number", "country", "state", "city", "address_line_1")
