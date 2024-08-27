@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Home, StoreView, ProductView, CartView, AddToCartView, QuantityView, RemoveView
+from .views import Home, StoreView, ProductView, CartView, AddToCartView, QuantityView, RemoveView, OrderView
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -11,7 +11,7 @@ urlpatterns = [
     path('addtocart/', AddToCartView.as_view(), name='add_to_cart'),
     path('cart/quantity/', QuantityView.as_view(), name='quantity_view'),
     path('cart/remove/<uuid:item_id>/', RemoveView.as_view(), name='remove_from_cart'),
-    # path('cart/placeorder/', OrderView.as_view(), name='order_place'),
+    path('cart/placeorder/', OrderView.as_view(), name='order_place'),
 
     
 ]
