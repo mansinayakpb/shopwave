@@ -21,6 +21,7 @@ class User(AbstractUser, TimesStampedModel):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    username = None
     email = models.EmailField(unique=True)
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, 
                                  default='Buyer')
