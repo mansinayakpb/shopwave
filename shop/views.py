@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, View
-from .models import Category, Product, Cart, CartItem, Profile
-from .forms import SignUpForm, BuyerForm
+from .models import Category, Product, Cart, CartItem, Profile, Order, OrderItem
+from .forms import SignUpForm, BuyerForm, SellerForm
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
@@ -133,24 +133,88 @@ class RemoveView(TemplateView):
         return redirect('cart_view')
 
 
-
-
-
-
-
-
+class OrderView(TemplateView):
+    template_name = 'place-order.html'
+    
+    def get(self, request):
+        if not request.user.is_authenticated:
+            messages.error(request, 'You need to be logged in to place an order')
+            return redirect('login')
         
-
+        cart = Cart.objects.filter(buyer=request.user).first()
+        if not cart:
+            messages.error(request, 'No cart found for user')
+            return redirect('cart_view')
         
+        cart_items = CartItem.objects.filter(cart=cart)
+
+        if not cart_items:
+            messages.error(request, 'Your cart is empty')
+            return redirect('cart_view')
+        
+        total_price = sum(item.quantity * item.product.price for item in cart_items)
+        
+        context = {
+            'cart_items': cart_items,
+            'total_price': total_price,
+        }
+        
+        if 'place_order' in request.GET:
+            # Handle the order placement
+            order = Order.objects.create(
+                buyer=request.user,
+                total_price=total_price,
+                is_paid=False,
+            )
+
+            for item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    price=item.product.price
+                )
+
+            cart_items.delete()
+
+            messages.success(request, 'Your order has been placed successfully')
+            return redirect('/')
+        
+        return self.render_to_response(context)
+    
+
+class BuyerDashboardView(TemplateView):
+    template_name = 'dashboard.html'
+
+    def get(self, request, *args, **kwargs):
+        user_profile = Profile.objects.filter(user=request.user).first()
+
+        if user_profile and user_profile.choice == 'Buyer':
+            context = {
+                'profile': user_profile,
+                # Add additional buyer-specific context here
+            }
+        else:
+            context = {}
+
+        return self.render_to_response(context)
 
 
-       
+class SellerDashboardView(TemplateView):
+    template_name = 'dashboard.html'
 
+    def get(self, request, *args, **kwargs):
+        user_profile = Profile.objects.filter(user=request.user).first()
 
+        if user_profile and user_profile.choice == 'Seller':
+            context = {
+                'profile': user_profile,
+                # Add additional buyer-specific context here
+            }
+        else:
+            context = {}
 
-
-
-
+        return self.render_to_response(context)
 
 
 
@@ -219,10 +283,14 @@ class UserLoginView(TemplateView):
 #         else:
 #             return redirect('/login/')
 
-class UserProfileView(TemplateView):
-    template_name = 'signin/profile.html'
+class BuyerProfileView(TemplateView, View):
+    template_name = 'buyer/buyer_profile.html'
 
     def get(self, request):
+
+        if request.user.user_type != "Buyer":
+            return redirect('seller_profile')
+
         user_profile = Profile.objects.filter(user=request.user).first()
         if not user_profile:
             user_profile = Profile(user=request.user)
@@ -230,12 +298,59 @@ class UserProfileView(TemplateView):
         
         form = BuyerForm(instance=user_profile)
         context = {
-            'form': form
+            'form': form,
+            'form_action': 'profile'
            
         }
         return render(request, self.template_name, context)
 
+    def post(self, request, *args, **kwargs):
+        user_profile = Profile.objects.filter(user=request.user).first()
+        buyer_form = BuyerForm(data=request.POST, instance=user_profile)
+        if buyer_form.is_valid():
+            buyer_form.save()
+
+        return redirect('profile')
+
+
+class SellerProfileView(TemplateView, View):
+    template_name = 'seller/profile.html'
+
+    def get(self, request):
+
+        if request.user.user_type != "Seller":
+            return redirect('profile')
+
+        seller_profile = Profile.objects.filter(user=request.user).first()
+        if not seller_profile:
+            seller_profile = Profile(user=request.user)
+            seller_profile.save()
+        
+        form = SellerForm(instance=seller_profile)
+        context = {
+            'form': form,
+            'form_action': 'seller'
+           
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        seller_profile = Profile.objects.filter(user=request.user).first()
+        seller_form = SellerForm(data=request.POST, instance=seller_profile)
+        if seller_form.is_valid():
+            seller_form.save()
+
+        return redirect('seller')
     
+
+
+
+
+
+
+
+
+
 
 # logout
 
