@@ -30,8 +30,9 @@
 				<ul class="list-menu">
 					{% for category in categories %}
 						{% comment %} <li><a class="dropdown-item" href="{% url 'product' category.id %}">{{ category.category_name }}</a></li> {% endcomment %}
-			
-						<li><a href="{% url 'product' category.id %}">{{ category.category_name }}</a></li>
+						<li><a class="dropdown-item" href="{% url 'store' %}?category={{ category.category_name }}">{{ category.category_name }}</a></li>
+
+						{% comment %} <li><a href="{% url 'product' category.id %}">{{ category.category_name }}</a></li> {% endcomment %}
 						{% comment %} <li><a href="{% url 'product_by_category_name' category.pk %}">{{ category.pk }}</a></li> {% endcomment %}
 					    
 					{% endfor %}

@@ -15,6 +15,11 @@
                     <button type="submit" class="btn btn-primary btn-block">Login</button>
                 </div>
             </form>
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="{{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
         </article><!-- card-body.// -->
     </div> <!-- card .// -->
     <p class="text-center mt-4">Don't have an account? <a href="{% url 'signup' %}">Register</a></p>
