@@ -80,11 +80,32 @@ class CustomUserChangeForm(UserChangeForm):
 class BuyerForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ("user", "phone_number", "country", "state", "city", "address_line_1")
+        fields = ("first_name", "last_name", "phone_number", "country", "state", "city", "address_line_1")
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+            'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Country'}),
+            'state': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'State'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}),
+            'address_line_1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address Line 1'}),
+        }
 
 
 class SellerForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ("user", "phone_number", "country", "state", "city", "address_line_1")
+        fields = ("first_name", "last_name", "gst", "pan_number", "phone_number", "country", "state", "city", "address_line_1")
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'gst': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'GST Number'}),
+            'pan_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PAN Number'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+            'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Country'}),
+            'state': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'State'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}),
+            'address_line_1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address Line 1'}),
+
+        }
