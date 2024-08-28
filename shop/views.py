@@ -8,7 +8,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 
 
-# Authentication
+# **************************************Authentication*****************************************************
 
 # SIGNUP
 
@@ -34,8 +34,6 @@ class SignUpView(TemplateView):
         return render(request, self.template_name, {'form': form})
 
 # Login
-
-
 class UserLoginView(TemplateView):
     template_name = 'signin/login.html'
 
@@ -70,7 +68,7 @@ class UserLogoutView(View):
         return redirect('/')
 
 
-# Profile
+# ********************************************* Profile***************************************************
 
 
 class BuyerProfileView(TemplateView, View):
@@ -132,7 +130,7 @@ class SellerProfileView(TemplateView, View):
 
         return redirect('seller')
 
-# Dashboard
+# ***********************************************Dashboard************************************************************
 
 # Buyer Dashboard
 
@@ -208,7 +206,40 @@ class SellerProductsView(TemplateView):
     def get(self, request, *args, **kwargs):
         products = Product.objects.filter(seller=request.user)
         return render(request, self.template_name, {'products': products})
-    
+
+
+class UpdateSellerProductView(View):
+    template_name = 'seller/createproduct_seller.html'
+
+    def get(self, request, product_id):
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            messages.error(request, "Product not found.")
+            return redirect('myproducts_seller')
+        
+        form = SellerDashboardForm(instance=product)
+        return render(request, self.template_name, {'form': form, 'product': product})
+
+    def post(self, request, product_id):
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            messages.error(request, "Product not found.")
+            return redirect('myproducts_seller')
+        
+        form = SellerDashboardForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product updated successfully!')
+            return redirect('myproducts_seller')
+        else:
+            messages.error(request, 'There was an error with your submission.')
+        
+        return render(request, self.template_name, {'form': form, 'product': product})
+
+
+# Buyer Dashboard
+
+
 
 
 
@@ -263,7 +294,7 @@ class StoreView(TemplateView):
         }
         return render(request, self.template_name, context)
 
-
+# ************************************************Cart**************************************************
 # Display the Cart Page
 
 
@@ -352,6 +383,7 @@ class RemoveView(TemplateView):
 
         return redirect('cart_view')
 
+# *********************************************order***************************************************
 
 # order page review the cart items
 
@@ -403,3 +435,4 @@ class OrderView(TemplateView):
             return redirect('/')
         
         return self.render_to_response(context)
+
