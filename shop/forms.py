@@ -123,3 +123,4 @@ class SellerDashboardForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
         }
 
+
