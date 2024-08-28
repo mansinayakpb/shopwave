@@ -3,7 +3,6 @@ from .models import User, Profile, Category, Product, Order, OrderItem, Cart, Ca
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
-
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
@@ -76,6 +75,8 @@ class CustomUserChangeForm(UserChangeForm):
         model = User
         fields = ("email",)
 
+# Profile forms for Buyer and Seller
+
 
 class BuyerForm(forms.ModelForm):
     class Meta:
@@ -109,3 +110,16 @@ class SellerForm(forms.ModelForm):
             'address_line_1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address Line 1'}),
 
         }
+
+# form tp create product by seller in dashboard 
+
+
+class SellerDashboardForm(forms.ModelForm):
+
+    class Meta:
+        model = Product
+        fields = ("category", "product_name", "description", "price", "stock", "size", "image", "price")
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
+
