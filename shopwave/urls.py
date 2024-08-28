@@ -24,7 +24,11 @@ urlpatterns = [
     # path('register/', views.RegisterView, name='register'),
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('login/', views.UserLoginView.as_view(), name='login'),
+    path('logout/', views.UserLogoutView.as_view(), name='logout'),
     path('profile/', views.BuyerProfileView.as_view(), name='profile'),
     path('seller/profile/', views.SellerProfileView.as_view(), name='seller_profile'),
-    path('logout/', views.UserLogoutView.as_view(), name='logout'),
+    path('seller/dashboard/', views.SellerDashboardView.as_view(), name='seller_dashboard'),
+    path('seller/create-product/', views.CreateProductBySellerView.as_view(), name='createproduct_seller'),
+    path('my-products/', views.SellerProductsView.as_view(), name='myproducts_seller'),
+    
 ]
