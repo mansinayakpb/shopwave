@@ -35,19 +35,20 @@
 
                     <!-- Products listing -->
                     {% if products %}
-                    {% for product in products %}
-                        <ul class="list-group">
+                    <ul class="list-group">
+                        {% for product in products %}
                             <li class="list-group-item">
-                                    <a href="" class="btn btn-primary">Edit Product</a>
-                                    <h5>{{ product.product_name }}</h5>
-                                    <p>Price: ${{ product.price }}</p>
-                                    <p>Stock: {{ product.stock }}</p>
-                                    <p>Description: {{ product.description }}</p>
-                                    <img src="{{ product.image.url }}" alt="{{ product.product_name }}" class="img-fluid" width=150px/>
-                                </li>
-                            </ul>
+                                <a href="{% url 'updateproduct_seller' product.id %}" class="btn btn-primary">Edit Product</a>
+                                <h5>{{ product.product_name }}</h5>
+                                <p>Price: ${{ product.price }}</p>
+                                <p>Stock: {{ product.stock }}</p>
+                                <p>Description: {{ product.description }}</p>
+                                <img src="{{ product.image.url }}" alt="{{ product.product_name }}" class="img-fluid" width=150px/>
+                            </li>
+                        {% endfor %}
+                    </ul>
                             <br>
-                            {% endfor %}
+                            {% comment %} {% endfor %} {% endcomment %}
                     {% else %}
                         <p>No products found.</p>
                     {% endif %}
@@ -61,3 +62,25 @@
 <!-- ========================= SECTION CONTENT END// ========================= -->
 
 {% endblock body_content %}
+
+
+
+
+
+{% comment %} {% if products %}
+                    {% for product in products %}
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                    <a onclick="window.location.href='{% url 'createproduct_seller' %}'" class="btn btn-primary">Edit Product</a>
+                                    <h5>{{ product.product_name }}</h5>
+                                    <p>Price: ${{ product.price }}</p>
+                                    <p>Stock: {{ product.stock }}</p>
+                                    <p>Description: {{ product.description }}</p>
+                                    <img src="{{ product.image.url }}" alt="{{ product.product_name }}" class="img-fluid" width=150px/>
+                                </li>
+                            </ul>
+                            <br>
+                            {% endfor %}
+                    {% else %}
+                        <p>No products found.</p>
+                    {% endif %} {% endcomment %}
