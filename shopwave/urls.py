@@ -30,5 +30,5 @@ urlpatterns = [
     path('seller/dashboard/', views.SellerDashboardView.as_view(), name='seller_dashboard'),
     path('seller/create-product/', views.CreateProductBySellerView.as_view(), name='createproduct_seller'),
     path('my-products/', views.SellerProductsView.as_view(), name='myproducts_seller'),
-    
+    path('edit-product/<uuid:product_id>/', views.UpdateSellerProductView.as_view(), name='updateproduct_seller'),    
 ]
