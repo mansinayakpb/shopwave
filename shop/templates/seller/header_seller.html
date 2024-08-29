@@ -61,27 +61,28 @@
                 <div class="col-lg-3 col-sm-6 col-8 order-2 order-lg-3">
                     <div class="d-flex justify-content-end mb-3 mb-lg-0">
                         <div class="widget-header">
-                            <small class="title text-muted">Welcome Seller!</small>
+                            {% comment %} <small class="title text-muted">Welcome Seller!</small> {% endcomment %}
                             <div>
                                 {% if request.user.is_authenticated %}
+                                <a href="{% url 'home' %}">Home</a> <span class="dark-transp"> | </span>
                                 <a href="{% url 'logout' %}">Logout</a> <span class="dark-transp"> | </span>
                                 {% comment %} {% if request.user.choice == 'Seller' %} {% endcomment %}
                                     {% comment %} <a href="{% url 'profile' %}">Dashboard</a> <span class="dark-transp"> | </span>
                                 {% else %} {% endcomment %}
-                                    <a href="{% url 'seller_dashboard' %}">Dashboard</a> <span class="dark-transp"> | </span>
-                                {% endif %}
+                                    <a href="{% url 'seller_dashboard' %}">Dashboard</a> <span class="dark-transp">  </span>
+                                {% comment %} {% endif %} {% endcomment %}
 
 
-                                {% comment %} {% else %} 
+                                {% else %} 
                                     <a href="{% url 'login' %}">Login</a> <span class="dark-transp"> | </span>
                                     <a href="{% url 'signup' %}">Register</a>
-                                {% endif %} {% endcomment %}
+                                {% endif %} 
                             </div>
                         </div>
-                        <a href="{% url 'cart_view' %}" class="widget-header pl-3 ml-3">
+                        {% comment %} <a href="{% url 'cart_view' %}" class="widget-header pl-3 ml-3">
                             <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
                             <span class="badge badge-pill badge-danger notify">0</span>
-                        </a>
+                        </a> {% endcomment %}
                     </div> <!-- widgets-wrap.// -->
                 </div> <!-- col.// -->
             </div> <!-- row.// -->

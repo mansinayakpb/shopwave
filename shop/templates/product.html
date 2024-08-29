@@ -114,11 +114,13 @@
                 <p>Price: ₹{{ product.price }}</p>
                 <p>Stock: {{ product.stock }}</p>
 
+                {% if request.user.user_type == 'Buyer' %}
                 <form method="post" action="{% url 'add_to_cart' %}">
                     {% csrf_token %}
                     <input type="hidden" name="product_id" value="{{ product.id }}">
                     <button type="submit" class="btn btn-primary">Add to Cart</button>
                 </form>
+                {% endif %}
                 {% comment %} <button class="btn btn-primary">Add to Cart</button> {% endcomment %}
             </div>
         </div>

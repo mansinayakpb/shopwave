@@ -60,29 +60,39 @@
                 </div> <!-- col.// -->
                 <div class="col-lg-3 col-sm-6 col-8 order-2 order-lg-3">
                     <div class="d-flex justify-content-end mb-3 mb-lg-0">
-                        <div class="widget-header">
-                            <small class="title text-muted">Welcome guest!</small>
+                        <div class="widget-header">                            
+                            {% if request.user.is_authenticated %}                            
+                                {% if request.user.user_type == 'Buyer' %}
+                                    <small class="title text-muted">Welcome Buyer!</small>
+                                {% else %}
+                                    <small class="title text-muted">Welcome Seller!</small>
+                                {% endif %}
+                            {% else %}
+                                <small class="title text-muted">Welcome Guest!</small>
+                            {% endif %}                            
                             <div>
                                 {% if request.user.is_authenticated %}
+                                <a href="{% url 'home' %}">Home</a> <span class="dark-transp"> | </span>
                                 <a href="{% url 'logout' %}">Logout</a> <span class="dark-transp"> | </span>
-                                {% if request.user.choice == 'Buyer' %}
+                                {% if request.user.user_type == 'Buyer' %}
                                     <a href="{% url 'profile' %}">Profile</a> <span class="dark-transp"> | </span>
                                 {% else %}
-                                    <a href="{% url 'seller_profile' %}">Profile</a> <span class="dark-transp"> | </span>
+                                    <a href="{% url 'seller_dashboard' %}">Dashboard</a> <span class="dark-transp"> 
                                 {% endif %}
-
 
                                 {% else %} 
                                     <a href="{% url 'login' %}">Login</a> <span class="dark-transp"> | </span>
                                     <a href="{% url 'signup' %}">Register</a>
                                 {% endif %}
                             </div>
+                            {% if request.user.user_type == 'Buyer' %}
                         </div>
                         <a href="{% url 'cart_view' %}" class="widget-header pl-3 ml-3">
                             <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
-                            <span class="badge badge-pill badge-danger notify">0</span>
+                            <span class="badge badge-pill badge-danger notify">{{ cart_item_count }}</span>
                         </a>
                     </div> <!-- widgets-wrap.// -->
+                    {% endif %}
                 </div> <!-- col.// -->
             </div> <!-- row.// -->
         </div> <!-- container.// -->
