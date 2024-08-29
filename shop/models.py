@@ -124,6 +124,19 @@ class OrderItem(TimesStampedModel):
         return f'{self.quantity} of {self.product.product_name}'
 
 
+class Payment(TimesStampedModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=255)
+    payment_status = models.CharField(max_length=50)
+    transaction_id = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f'Payment {self.id} for order {self.order.id}'
+
+
 class Cart(TimesStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     buyer = models.OneToOneField(User, on_delete=models.CASCADE, 
