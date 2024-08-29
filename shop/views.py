@@ -268,26 +268,66 @@ class ProductView(TemplateView):
 # Store Page
 
 
+# class StoreView(TemplateView):
+#     template_name = 'store.html'
+
+#     def get(self, request):
+#         category_name = request.GET.get('category')
+#         cart_item_count = 0
+
+#         if request.user.is_authenticated:
+            
+#             cart = Cart.objects.filter(buyer=request.user).first()
+#             if cart:
+#                 cart_item_count = cart.cart_items.count()
+
+#         if category_name:
+#             category = Category.objects.filter(category_name=category_name).first()
+#             products = Product.objects.filter(category=category)
+#         else:
+#             products = Product.objects.all()
+
+#         categories = Category.objects.all()
+
+#         context = {
+#             'products': products,
+#             'categories': categories,
+#             'cart_item_count': cart_item_count,
+#         }
+#         return render(request, self.template_name, context)
+    
+
+
+
 class StoreView(TemplateView):
     template_name = 'store.html'
 
     def get(self, request):
         category_name = request.GET.get('category')
+        query = request.GET.get('q')
         cart_item_count = 0
 
-        if request.user.is_authenticated:
+        # Check if the search query is provided
+        if query:
+            products = Product.objects.filter(product_name__icontains=query)
+            categories = Category.objects.filter(category_name__icontains=query)
             
+            if not products and not categories:
+                messages.error(request, 'Oops! Product or category not found.')
+        else:
+            if category_name:
+                category = Category.objects.filter(category_name=category_name).first()
+                products = Product.objects.filter(category=category) 
+            else:
+                products = Product.objects.all()
+
+            categories = Category.objects.all()
+
+        # Fetch the user's cart and count the items if the user is authenticated
+        if request.user.is_authenticated:
             cart = Cart.objects.filter(buyer=request.user).first()
             if cart:
                 cart_item_count = cart.cart_items.count()
-
-        if category_name:
-            category = Category.objects.filter(category_name=category_name).first()
-            products = Product.objects.filter(category=category)
-        else:
-            products = Product.objects.all()
-
-        categories = Category.objects.all()
 
         context = {
             'products': products,
