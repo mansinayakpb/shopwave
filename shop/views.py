@@ -199,7 +199,6 @@ class CreateProductBySellerView(TemplateView):
         return self.render_to_response(context)
 
 
-
 class SellerProductsView(TemplateView):
     template_name = 'seller/myproduct_seller.html'
 
@@ -226,7 +225,7 @@ class UpdateSellerProductView(View):
             messages.error(request, "Product not found.")
             return redirect('myproducts_seller')
         
-        form = SellerDashboardForm(request.POST, instance=product)
+        form = SellerDashboardForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
             messages.success(request, 'Product updated successfully!')
@@ -238,11 +237,6 @@ class UpdateSellerProductView(View):
 
 
 # Buyer Dashboard
-
-
-
-
-
 # Home Page
 
 class Home(TemplateView):
@@ -279,10 +273,17 @@ class StoreView(TemplateView):
 
     def get(self, request):
         category_name = request.GET.get('category')
-        
+        cart_item_count = 0
+
+        if request.user.is_authenticated:
+            
+            cart = Cart.objects.filter(buyer=request.user).first()
+            if cart:
+                cart_item_count = cart.cart_items.count()
+
         if category_name:
             category = Category.objects.filter(category_name=category_name).first()
-            products = Product.objects.filter(category=category) 
+            products = Product.objects.filter(category=category)
         else:
             products = Product.objects.all()
 
@@ -291,8 +292,12 @@ class StoreView(TemplateView):
         context = {
             'products': products,
             'categories': categories,
+            'cart_item_count': cart_item_count,
         }
         return render(request, self.template_name, context)
+
+
+
 
 # ************************************************Cart**************************************************
 # Display the Cart Page
@@ -386,6 +391,7 @@ class RemoveView(TemplateView):
 # *********************************************order***************************************************
 
 # order page review the cart items
+
 
 class OrderView(TemplateView):
     template_name = 'place-order.html'
