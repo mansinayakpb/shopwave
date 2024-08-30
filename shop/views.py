@@ -1,3 +1,6 @@
+import stripe
+from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, View
 from .models import (
@@ -8,16 +11,17 @@ from .models import (
     Profile,
     Order,
     OrderItem,
+    Payment,
 )
-from .forms import SignUpForm, BuyerForm, SellerForm, SellerDashboardForm
+from .forms import SignUpForm, BuyerForm, SellerForm, SellerDashboardForm, OrderForm
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
+from django.urls import reverse
 
 
 # **************************************Authentication*****************************************************
-
 # SIGNUP
 
 
@@ -507,3 +511,85 @@ class OrderView(TemplateView):
             return redirect("/")
 
         return self.render_to_response(context)
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+class PaymentProcessView(View):
+    print("payment_process")
+    def post(self, request):
+        # card_number = request.POST.get('card_number')
+        # expiry_date = request.POST.get('expiry_date')
+        # cvc = request.POST.get('cvc')
+        # exp_month, exp_year = map(int, expiry_date.split('/'))
+
+        try:
+            # # Create a PaymentMethod object
+            # payment_method = stripe.PaymentMethod.create(
+            #     type='card',
+            #     card={
+            #         'number': card_number,
+            #         'exp_month': exp_month,
+            #         'exp_year': exp_year,
+            #         'cvc': cvc,
+            #     },
+            # )
+
+            # # Create a PaymentIntent
+            # intent = stripe.PaymentIntent.create(
+            #     amount=1000,  # Amount in cents
+            #     currency='usd',
+            #     payment_method=payment_method.id,
+            #     confirm=True,
+            #     receipt_email=request.user.email,  # Optional: for sending receipt
+            # )
+
+            host = self.request.get_host()
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    "price_data": {
+                        "currency": "inr",
+                        "unit_amount": 100,
+                        "product_data": {
+                            "name": 'good',
+                        },
+                    },
+                    "quantity": 2,
+                }],
+                mode='payment',
+                success_url=f"http://{host}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
+                cancel_url="http://{}{}".format(host, reverse("payment-cancel")),
+            )
+
+            # order = Order.objects.last()
+            # Payment.objects.create(
+            #     stripe_id=intent.id,
+            #     user=request.user,
+            #     order=order,
+            #     amount=1000 / 100,  # Convert cents to dollars
+            #     payment_method='card',
+            #     payment_status=intent.status,
+            #     transaction_id=intent.charges.data[0].id if intent.charges.data else None,
+            # )
+
+            # messages.success(request, 'Payment successful!')
+            # return redirect(reverse('success_page'))
+            return redirect(checkout_session.url, code=303)
+
+        except stripe.error.CardError as e:
+            messages.error(request, f'Card error: {e.user_message}')
+        except stripe.error.StripeError as e:
+            messages.error(request, f'Stripe error: {e.user_message}')
+        except Exception as e:
+            messages.error(request, f'Error: {str(e)}')
+
+        return redirect(reverse('payment_process'))
+
+def PaymentSuccess(request):
+    return render(request, 'success.html')
+
+
+def PaymentCancel(request):
+    return render(request, 'cancel.html')
