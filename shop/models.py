@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from shop.managers import UserManager
 import uuid
+from django.conf import settings
 
 
 class TimesStampedModel(models.Model):
@@ -123,12 +124,27 @@ class OrderItem(TimesStampedModel):
         return f'{self.quantity} of {self.product.product_name}'
 
 
+# class Payment(TimesStampedModel):
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#     stripe_id = models.CharField(max_length=50)
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL,
+#                              on_delete=models.SET_NULL, blank=True, null=True)
+#     order = models.ForeignKey(Order, on_delete=models.CASCADE)
+#     amount = models.DecimalField(max_digits=10, decimal_places=2)
+#     payment_method = models.CharField(max_length=255)
+#     payment_status = models.CharField(max_length=50)
+#     transaction_id = models.CharField(max_length=255, blank=True, null=True)
+
+#     def __str__(self):
+#         return f'Payment {self.id} for order {self.order.id}'
 class Payment(TimesStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey
+    stripe_id = models.CharField(max_length=100, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.SET_NULL, blank=True, null=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = models.CharField(max_length=255)
+    payment_method = models.CharField(max_length=100)
     payment_status = models.CharField(max_length=50)
     transaction_id = models.CharField(max_length=255, blank=True, null=True)
 
