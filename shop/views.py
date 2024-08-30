@@ -479,6 +479,5 @@ class OrderView(TemplateView):
 
             messages.success(request, 'Your order has been placed successfully')
             return redirect('/')
-        
-        return self.render_to_response(context)
 
+        return self.render_to_response(context)
