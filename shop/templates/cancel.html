@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section-content bg padding-y">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="text-center">Payment Canceled</h3>
+                        <p class="text-center">The payment process was canceled. If you have any questions or need assistance, please contact our support team.</p>
+                        <p class="text-center"><a href="{% url 'home' %}" class="btn btn-primary">Return to Home</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
