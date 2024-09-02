@@ -1,6 +1,5 @@
 import stripe
 from django.conf import settings
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, View
 from .models import (
@@ -13,15 +12,19 @@ from .models import (
     OrderItem,
     Payment,
 )
-from .forms import SignUpForm, BuyerForm, SellerForm, SellerDashboardForm, OrderForm
+from .forms import (
+    SignUpForm,
+    BuyerForm,
+    SellerForm,
+    SellerDashboardForm,
+    OrderForm,
+)
 from django.contrib import messages
-from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
+from django.http import JsonResponse
 
-
-# **************************************Authentication*****************************************************
 # SIGNUP
 
 
@@ -75,17 +78,13 @@ class UserLoginView(TemplateView):
 
 
 # logout
-
-
 class UserLogoutView(View):
     def get(self, request):
         logout(request)
         return redirect("/")
 
 
-# ********************************************* Profile***************************************************
-
-
+# Profile
 class BuyerProfileView(TemplateView, View):
     template_name = "buyer/buyer_profile.html"
 
@@ -94,22 +93,22 @@ class BuyerProfileView(TemplateView, View):
         if request.user.user_type != "Buyer":
             return redirect("seller_profile")
 
-        user_profile = Profile.objects.filter(user=request.user).first()
-        if not user_profile:
-            user_profile = Profile(user=request.user)
-            user_profile.save()
+        buyer_profile = Profile.objects.filter(user=request.user).first()
+        if not buyer_profile:
+            buyer_profile = Profile(user=request.user)
+            buyer_profile.save()
 
-        form = BuyerForm(instance=user_profile)
-        context = {"form": form, "form_action": "profile"}
+        form = BuyerForm(instance=buyer_profile)
+        context = {"form": form, "form_action": "buyer"}
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        user_profile = Profile.objects.filter(user=request.user).first()
-        buyer_form = BuyerForm(data=request.POST, instance=user_profile)
+        buyer_profile = Profile.objects.filter(user=request.user).first()
+        buyer_form = BuyerForm(data=request.POST, instance=buyer_profile)
         if buyer_form.is_valid():
             buyer_form.save()
 
-        return redirect("profile")
+        return redirect("buyer_profile")
 
 
 class SellerProfileView(TemplateView, View):
@@ -138,39 +137,30 @@ class SellerProfileView(TemplateView, View):
         return redirect("seller")
 
 
-# ***********************************************Dashboard************************************************************
-
 # Buyer Dashboard
-
-
 class BuyerDashboardView(TemplateView):
     template_name = "buyer/dashboard_buyer.html"
 
     def get(self, request, *args, **kwargs):
         user_profile = Profile.objects.filter(user=request.user).first()
-
-        if user_profile and user_profile.choice == "Buyer":
-            context = {
-                "profile": user_profile,
-            }
-        else:
-            context = {}
+        if not user_profile:
+            messages.error(request, "you are not authorized user")
+            return redirect("/")
+        context = {
+            "buyer_profile": user_profile,
+        }
 
         return self.render_to_response(context)
 
 
 # seller Dashboard
-
-
 class SellerDashboardView(TemplateView):
     template_name = "seller/dashboard_seller.html"
 
     def get(self, request, *args, **kwargs):
         user_profile = Profile.objects.filter(user=request.user).first()
         if not user_profile:
-            messages.error(
-                request, "You are not authorized to view this page."
-            )
+            messages.error(request, "You are not authorized to view this page.")
             return redirect("/")
 
         context = {
@@ -200,9 +190,7 @@ class CreateProductBySellerView(TemplateView):
                 messages.success(request, "Product created successfully!")
                 return redirect("seller_dashboard")
             else:
-                messages.error(
-                    request, "There was an error with your submission."
-                )
+                messages.error(request, "There was an error with your submission.")
         else:
             form = SellerDashboardForm()
 
@@ -230,9 +218,7 @@ class UpdateSellerProductView(View):
             return redirect("myproducts_seller")
 
         form = SellerDashboardForm(instance=product)
-        return render(
-            request, self.template_name, {"form": form, "product": product}
-        )
+        return render(request, self.template_name, {"form": form, "product": product})
 
     def post(self, request, product_id):
         product = Product.objects.filter(id=product_id).first()
@@ -240,9 +226,7 @@ class UpdateSellerProductView(View):
             messages.error(request, "Product not found.")
             return redirect("myproducts_seller")
 
-        form = SellerDashboardForm(
-            request.POST, request.FILES, instance=product
-        )
+        form = SellerDashboardForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
             messages.success(request, "Product updated successfully!")
@@ -250,15 +234,11 @@ class UpdateSellerProductView(View):
         else:
             messages.error(request, "There was an error with your submission.")
 
-        return render(
-            request, self.template_name, {"form": form, "product": product}
-        )
+        return render(request, self.template_name, {"form": form, "product": product})
 
 
 # Buyer Dashboard
 # Home Page
-
-
 class Home(TemplateView):
     template_name = "home.html"
 
@@ -270,8 +250,6 @@ class Home(TemplateView):
 
 
 # Details of the Product
-
-
 class ProductView(TemplateView):
     template_name = "product.html"
 
@@ -283,38 +261,6 @@ class ProductView(TemplateView):
         return render(request, self.template_name, context)
 
 
-# Store Page
-
-
-# class StoreView(TemplateView):
-#     template_name = 'store.html'
-
-#     def get(self, request):
-#         category_name = request.GET.get('category')
-#         cart_item_count = 0
-
-#         if request.user.is_authenticated:
-
-#             cart = Cart.objects.filter(buyer=request.user).first()
-#             if cart:
-#                 cart_item_count = cart.cart_items.count()
-
-#         if category_name:
-#             category = Category.objects.filter(category_name=category_name).first()
-#             products = Product.objects.filter(category=category)
-#         else:
-#             products = Product.objects.all()
-
-#         categories = Category.objects.all()
-
-#         context = {
-#             'products': products,
-#             'categories': categories,
-#             'cart_item_count': cart_item_count,
-#         }
-#         return render(request, self.template_name, context)
-
-
 class StoreView(TemplateView):
     template_name = "store.html"
 
@@ -322,27 +268,21 @@ class StoreView(TemplateView):
         category_name = request.GET.get("category")
         query = request.GET.get("q")
         cart_item_count = 0
-
         # Check if the search query is provided
         if query:
             products = Product.objects.filter(product_name__icontains=query)
-            categories = Category.objects.filter(
-                category_name__icontains=query
-            )
+            categories = Category.objects.filter(category_name__icontains=query)
 
             if not products and not categories:
                 messages.error(request, "Oops! Product or category not found.")
         else:
             if category_name:
-                category = Category.objects.filter(
-                    category_name=category_name
-                ).first()
+                category = Category.objects.filter(category_name=category_name).first()
                 products = Product.objects.filter(category=category)
             else:
                 products = Product.objects.all()
 
             categories = Category.objects.all()
-
         # Fetch the user's cart and count the items if the user is authenticated
         if request.user.is_authenticated:
             cart = Cart.objects.filter(buyer=request.user).first()
@@ -357,10 +297,8 @@ class StoreView(TemplateView):
         return render(request, self.template_name, context)
 
 
-# ************************************************Cart**************************************************
+# Cart
 # Display the Cart Page
-
-
 class CartView(TemplateView):
     template_name = "cart.html"
 
@@ -388,8 +326,6 @@ class CartView(TemplateView):
 
 
 # Add the product into the cart
-
-
 class AddToCartView(View):
     def post(self, request):
         product_id = request.POST.get("product_id")
@@ -401,9 +337,7 @@ class AddToCartView(View):
                 cart = Cart(buyer=request.user)
                 cart.save()
 
-            cart_item = CartItem.objects.filter(
-                cart=cart, product=product
-            ).first()
+            cart_item = CartItem.objects.filter(cart=cart, product=product).first()
             if not cart_item:
                 cart_item = CartItem(cart=cart, product=product, quantity=1)
                 cart_item.save()
@@ -415,8 +349,6 @@ class AddToCartView(View):
 
 
 # Add the quantity of the product
-
-
 class QuantityView(TemplateView):
     def post(self, request):
         cart_item_id = request.POST.get("cart_item_id")
@@ -437,8 +369,6 @@ class QuantityView(TemplateView):
 
 
 # Remove the items from the cart
-
-
 class RemoveView(TemplateView):
     def post(self, request, item_id):
         item = CartItem.objects.filter(id=item_id).first()
@@ -452,19 +382,13 @@ class RemoveView(TemplateView):
         return redirect("cart_view")
 
 
-# *********************************************order***************************************************
-
-# order page review the cart items
-
-
+# order
 class OrderView(TemplateView):
     template_name = "place-order.html"
 
     def get(self, request):
         if not request.user.is_authenticated:
-            messages.error(
-                request, "You need to be logged in to place an order"
-            )
+            messages.error(request, "You need to be logged in to place an order")
             return redirect("login")
 
         cart = Cart.objects.filter(buyer=request.user).first()
@@ -473,123 +397,162 @@ class OrderView(TemplateView):
             return redirect("cart_view")
 
         cart_items = CartItem.objects.filter(cart=cart)
-
         if not cart_items:
             messages.error(request, "Your cart is empty")
             return redirect("cart_view")
+        # Calculate total price, tax, and final total
+        total_price = 0.0
+        tax_rate = 0.10
+        for item in cart_items:
+            item.total_price = float(item.product.price) * float(item.quantity)
+            total_price += item.total_price
 
-        total_price = sum(
-            item.quantity * item.product.price for item in cart_items
-        )
+        tax = total_price * tax_rate
+        final_total = total_price + tax
 
         context = {
+            "cart": cart,
             "cart_items": cart_items,
             "total_price": total_price,
+            "tax": tax,
+            "final_total": final_total,
         }
 
-        if "place_order" in request.GET:
-            # Handle the order placement
-            order = Order.objects.create(
-                buyer=request.user,
-                total_price=total_price,
-                is_paid=False,
-            )
-
-            for item in cart_items:
-                OrderItem.objects.create(
-                    order=order,
-                    product=item.product,
-                    quantity=item.quantity,
-                    price=item.product.price,
-                )
-
-            cart_items.delete()
-
-            messages.success(
-                request, "Your order has been placed successfully"
-            )
-            return redirect("/")
-
         return self.render_to_response(context)
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            messages.error(request, "You need to be logged in to place an order")
+            return redirect("login")
+
+        cart = Cart.objects.filter(buyer=request.user).first()
+        cart_items = CartItem.objects.filter(cart=cart)
+
+        total_price = 0.0
+        tax_rate = 0.10
+        for item in cart_items:
+            item.total_price = float(item.product.price) * float(item.quantity)
+            total_price += item.total_price
+
+        tax = total_price * tax_rate
+        final_total = total_price + tax
+
+        # Create the order
+        order = Order.objects.create(
+            buyer=request.user,
+            total_price=final_total,
+            is_paid=False,
+        )
+
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price,
+            )
+
+        cart_items.delete()
+
+        # Stripe payment setup
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        success_url = (
+            request.build_absolute_uri(reverse("success")) + f"?order_id={order.id}"
+        )
+        # cancel_url = request.build_absolute_uri(reverse("cancel"))
+
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "inr",
+                        "product_data": {
+                            "name": f"Order {order.id}",
+                        },
+                        "unit_amount": int(final_total * 100),
+                    },
+                    "quantity": 1,
+                }
+            ],
+            mode="payment",
+            success_url=success_url,
+            # cancel_url=cancel_url,
+        )
+
+        # Create a Payment record
+        Payment.objects.create(
+            user=request.user,
+            order=order,
+            amount=final_total,
+            payment_method="stripe",
+            payment_status="pending",  # This will change when the payment is confirmed
+            transaction_id=checkout_session.id,
+        )
+
+        return redirect(checkout_session.url, code=303)
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-class PaymentProcessView(View):
-    print("payment_process")
-    def post(self, request):
-        # card_number = request.POST.get('card_number')
-        # expiry_date = request.POST.get('expiry_date')
-        # cvc = request.POST.get('cvc')
-        # exp_month, exp_year = map(int, expiry_date.split('/'))
+class StripeWebhookView(View):
+    def post(self, request, *args, **kwargs):
+        payload = request.body
+        sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+        endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+
+        if not sig_header or not payload:
+            return JsonResponse({"status": "invalid request"}, status=400)
 
         try:
-            # # Create a PaymentMethod object
-            # payment_method = stripe.PaymentMethod.create(
-            #     type='card',
-            #     card={
-            #         'number': card_number,
-            #         'exp_month': exp_month,
-            #         'exp_year': exp_year,
-            #         'cvc': cvc,
-            #     },
-            # )
+            event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+        except (ValueError, stripe.error.SignatureVerificationError):
+            return JsonResponse({"status": "invalid signature or payload"}, status=400)
 
-            # # Create a PaymentIntent
-            # intent = stripe.PaymentIntent.create(
-            #     amount=1000,  # Amount in cents
-            #     currency='usd',
-            #     payment_method=payment_method.id,
-            #     confirm=True,
-            #     receipt_email=request.user.email,  # Optional: for sending receipt
-            # )
+        if event.get("type") == "checkout.session.completed":
+            session = event["data"]["object"]
+            stripe_payment_id = session.get("id")
+            payment_intent = session.get("payment_intent")
 
-            host = self.request.get_host()
-            checkout_session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    "price_data": {
-                        "currency": "inr",
-                        "unit_amount": 100,
-                        "product_data": {
-                            "name": 'good',
-                        },
-                    },
-                    "quantity": 2,
-                }],
-                mode='payment',
-                success_url=f"http://{host}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
-                cancel_url="http://{}{}".format(host, reverse("payment-cancel")),
-            )
+            if stripe_payment_id and payment_intent:
+                payment = Payment.objects.filter(stripe_id=stripe_payment_id).first()
+                if payment:
+                    payment.payment_status = "successful"
+                    payment.transaction_id = payment_intent
+                    payment.save()
 
-            # order = Order.objects.last()
-            # Payment.objects.create(
-            #     stripe_id=intent.id,
-            #     user=request.user,
-            #     order=order,
-            #     amount=1000 / 100,  # Convert cents to dollars
-            #     payment_method='card',
-            #     payment_status=intent.status,
-            #     transaction_id=intent.charges.data[0].id if intent.charges.data else None,
-            # )
-
-            # messages.success(request, 'Payment successful!')
-            # return redirect(reverse('success_page'))
-            return redirect(checkout_session.url, code=303)
-
-        except stripe.error.CardError as e:
-            messages.error(request, f'Card error: {e.user_message}')
-        except stripe.error.StripeError as e:
-            messages.error(request, f'Stripe error: {e.user_message}')
-        except Exception as e:
-            messages.error(request, f'Error: {str(e)}')
-
-        return redirect(reverse('payment_process'))
-
-def PaymentSuccess(request):
-    return render(request, 'success.html')
+        return JsonResponse({"status": "success"}, status=200)
 
 
-def PaymentCancel(request):
-    return render(request, 'cancel.html')
+class SuccessView(TemplateView):
+    template_name = "success.html"
+
+    def get(self, request, *args, **kwargs):
+        order_id = request.GET.get("order_id")
+        if order_id:
+            payment = Payment.objects.filter(order__id=order_id).first()
+            if payment and payment.payment_status == "pending":
+                # Assuming the payment was successful at this point
+                payment.payment_status = "successful"
+                payment.save()
+
+            # Pass the order and payment objects to the template
+            context = {
+                "order": payment.order,
+                "payment": payment,
+            }
+            return self.render_to_response(context)
+
+        return super().get(request, *args, **kwargs)
+
+
+class OrderHistoryView(TemplateView):
+    template_name = "buyer/dashboard_buyer.html"
+
+    def get(self, request):
+        orders = Order.objects.filter(buyer=request.user).order_by("ordered_at")
+        context = {
+            "orders": orders,
+        }
+        return render(request, self.template_name, context)
