@@ -2,8 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from shop.managers import UserManager
-import uuid
 from django.conf import settings
+import uuid
 
 
 class TimesStampedModel(models.Model):
@@ -17,22 +17,23 @@ class TimesStampedModel(models.Model):
 class User(AbstractUser, TimesStampedModel):
 
     USER_TYPE_CHOICES = [
-        ('Buyer', 'Buyer'),
-        ('Seller', 'Seller'),
+        ("Buyer", "Buyer"),
+        ("Seller", "Seller"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = None
     email = models.EmailField(unique=True)
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES,
-                                 default='Buyer')
+    user_type = models.CharField(
+        max_length=10, choices=USER_TYPE_CHOICES, default="Buyer"
+    )
     email_verified = models.BooleanField(default=False)
     verification_code = models.CharField(max_length=36, blank=True)
     is_approved = models.BooleanField(default=False)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     def __str__(self):
@@ -41,11 +42,9 @@ class User(AbstractUser, TimesStampedModel):
 
 class Profile(TimesStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE,
-                                related_name='profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     phone_number = models.CharField(max_length=20, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/',
-                                        blank=True)
+    profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True)
     # Buyer fields
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
@@ -62,13 +61,13 @@ class Profile(TimesStampedModel):
     pan_number = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.user.email}'
+        return f"{self.user.email}"
 
 
 class Category(TimesStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     category_name = models.CharField(max_length=255, unique=True)
-    cat_image = models.ImageField(upload_to='static/', null=True, blank=True)
+    cat_image = models.ImageField(upload_to="static/", null=True, blank=True)
     description = models.TextField(blank=True)
 
     def __str__(self):
@@ -77,23 +76,29 @@ class Category(TimesStampedModel):
 
 class Product(TimesStampedModel):
     SIZE_CHOICES = [
-        ('S', 'S'),
-        ('M', 'M'),
-        ('L', 'L'),
-        ('XL', 'XL'),
-        ('XXL', 'XXL'),
+        ("S", "S"),
+        ("M", "M"),
+        ("L", "L"),
+        ("XL", "XL"),
+        ("XXL", "XXL"),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    seller = models.ForeignKey(User, on_delete=models.CASCADE,
-                               related_name='seller_products')
-    category = models.ForeignKey('Category', on_delete=models.CASCADE,
-                                 null=True, blank=True, related_name='category_products')
+    seller = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="seller_products"
+    )
+    category = models.ForeignKey(
+        "Category",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="category_products",
+    )
     product_name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
-    size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='M')
-    image = models.ImageField(upload_to='static/', null=True, blank=True)
+    size = models.CharField(max_length=10, choices=SIZE_CHOICES, default="M")
+    image = models.ImageField(upload_to="static/", null=True, blank=True)
 
     def __str__(self):
         return self.product_name
@@ -101,73 +106,61 @@ class Product(TimesStampedModel):
 
 class Order(TimesStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE,
-                              related_name='orders')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     is_paid = models.BooleanField(default=False)
     ordered_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f'Order {self.id} by {self.buyer.email}'
+        return f"Order {self.id} by {self.buyer.email}"
 
 
 class OrderItem(TimesStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE,
-                              related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE,
-                                related_name='order_items')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="order_items"
+    )
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f'{self.quantity} of {self.product.product_name}'
+        return f"{self.quantity} of {self.product.product_name}"
 
 
-# class Payment(TimesStampedModel):
-#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-#     stripe_id = models.CharField(max_length=50)
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL,
-#                              on_delete=models.SET_NULL, blank=True, null=True)
-#     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-#     amount = models.DecimalField(max_digits=10, decimal_places=2)
-#     payment_method = models.CharField(max_length=255)
-#     payment_status = models.CharField(max_length=50)
-#     transaction_id = models.CharField(max_length=255, blank=True, null=True)
-
-#     def __str__(self):
-#         return f'Payment {self.id} for order {self.order.id}'
 class Payment(TimesStampedModel):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    stripe_id = models.CharField(max_length=100, null=True, blank=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.SET_NULL, blank=True, null=True)
+    stripe_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = models.CharField(max_length=100)
+    payment_method = models.CharField(max_length=255)
     payment_status = models.CharField(max_length=50)
     transaction_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f'Payment {self.id} for order {self.order.id}'
+        return f"Payment {self.stripe_id} for order {self.order.id}"
 
 
 class Cart(TimesStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    buyer = models.OneToOneField(User, on_delete=models.CASCADE,
-                                 related_name='cart')
+    buyer = models.OneToOneField(User, on_delete=models.CASCADE, related_name="cart")
 
     def __str__(self):
-        return f'{self.buyer.email}\'s cart'
+        return f"{self.buyer.email}'s cart"
 
 
 class CartItem(TimesStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE,
-                             related_name='cart_items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE,
-                                related_name='cart_products')
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="cart_products"
+    )
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
-        return f'{self.quantity} of {self.product.product_name} in cart'
+        return f"{self.quantity} of {self.product.product_name} in cart"
