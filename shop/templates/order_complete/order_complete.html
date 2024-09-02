@@ -8,6 +8,29 @@
                     <div class="card-body">
                         <h4 class="card-title mb-4">Order Confirmation</h4>
                         <p>Your order has been successfully placed! Thank you for shopping with us.</p>
+                        <p>Order ID: {{ order.id }}</p>
+                        <p>Total Price: {{ order.total_price }}</p>
+                        <p>Date: {{ order.ordered_at }}</p>
+                        <p>We will notify you once your order is dispatched.</p>
+                        <a href="{% url 'index' %}" class="btn btn-primary">Back to Home</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% comment %} {% extends "base.html" %}
+{% block body_content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <article class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Order Confirmation</h4>
+                        <p>Your order has been successfully placed! Thank you for shopping with us.</p>
                         <p>Order ID: {{ order_id }}</p>
                         <p>Total Price: {{ total_price }}</p>
                         <p>Date: {{ order_date }}</p>
@@ -19,4 +42,4 @@
         </div> <!-- row.// -->
     </div> <!-- container .// -->
 </section>
-{% endblock %}
+{% endblock %} {% endcomment %}
