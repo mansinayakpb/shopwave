@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 from .models import (Cart, CartItem, Category, Order, OrderItem, Payment,
                      Product, Profile, User)
