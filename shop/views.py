@@ -1,20 +1,29 @@
-from django.shortcuts import render, redirect
+import stripe
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import PasswordChangeView
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, View
+
+from .email_utils import send_verification_email
+from .forms import BuyerForm, SellerDashboardForm, SellerForm, SignUpForm
 from .models import (
-    Category,
-    Product,
     Cart,
     CartItem,
-    Profile,
+    Category,
     Order,
     OrderItem,
+    Payment,
+    Product,
+    Profile,
+    User,
 )
-from .forms import SignUpForm, BuyerForm, SellerForm, SellerDashboardForm
-from django.contrib import messages
-from django.utils import timezone
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login, logout
-
 
 # **************************************Authentication*****************************************************
 
@@ -36,7 +45,8 @@ class SignUpView(TemplateView):
 
         form = SignUpForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            send_verification_email(user, request)
             messages.success(request, "Account Created Successfully!")
             return redirect("/")
 
@@ -47,7 +57,7 @@ class SignUpView(TemplateView):
 
 
 class UserLoginView(TemplateView):
-    template_name = "signin/login.html"
+    template_name = "signin/login.html"  # Retaining the original template
 
     def get(self, request):
         if request.user.is_authenticated:
@@ -57,19 +67,61 @@ class UserLoginView(TemplateView):
             return render(request, self.template_name, {"form": form})
 
     def post(self, request):
-        if request.user.is_authenticated:
-            return redirect("/")
-
         form = AuthenticationForm(request=request, data=request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            messages.success(request, "Logged in Successfully")
-            return redirect("/")
+            user_name = form.cleaned_data["username"]
+            user_password = form.cleaned_data["password"]
+            user = authenticate(username=user_name, password=user_password)
+            if user is not None:
+                if not user.email_verified:
+                    if user.is_token_valid():
+                        login(request, user)
+                        messages.success(request, "Logged in Successfully!!")
+                        return redirect("/")
+                    else:
+                        user.generate_verification_code()
+                        send_verification_email(user, request)
+                        messages.error(
+                            request,
+                            "Your email verification link has expired. A new verification link has been sent to your email.",
+                        )
+                        return redirect("login")
+                else:
+                    login(request, user)
+                    return redirect("/")
+            else:
+                form.add_error(None, "Invalid username or password")
         else:
             messages.error(request, "Invalid username or password")
 
         return render(request, self.template_name, {"form": form})
+
+
+class ActivateAccountView(TemplateView):
+    def get(self, request, uid, token):
+        user = User.objects.filter(id=uid, verification_code=token).first()
+
+        if user and user.is_token_valid():
+            user.email_verified = True
+            user.verification_code = None
+            user.token_created_at = None
+            user.save()
+            messages.success(
+                request,
+                "Thank you for verifying your email. You can now log in.",
+            )
+            return redirect("login")
+        elif user:
+            user.generate_verification_code()
+            send_verification_email(user, request)
+            messages.error(
+                request,
+                "Your email verification link has expired. A new verification link has been sent to your email.",
+            )
+            return redirect("login")
+        else:
+            messages.error(request, "Invalid verification link.")
+            return redirect("login")
 
 
 # logout
@@ -84,39 +136,42 @@ class UserLogoutView(View):
 # ********************************************* Profile***************************************************
 
 
-class BuyerProfileView(TemplateView, View):
+class BuyerProfileView(LoginRequiredMixin, TemplateView):
     template_name = "buyer/buyer_profile.html"
 
     def get(self, request):
 
+        if not request.user.is_authenticated:
+            return redirect("/")
+
         if request.user.user_type != "Buyer":
             return redirect("seller_profile")
 
-        user_profile = Profile.objects.filter(user=request.user).first()
-        if not user_profile:
-            user_profile = Profile(user=request.user)
-            user_profile.save()
+        buyer_profile = Profile.objects.filter(user=request.user).first()
+        if not buyer_profile:
+            buyer_profile = Profile(user=request.user)
+            buyer_profile.save()
 
-        form = BuyerForm(instance=user_profile)
-        context = {"form": form, "form_action": "profile"}
+        form = BuyerForm(instance=buyer_profile)
+        context = {"form": form, "form_action": "buyer"}
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        user_profile = Profile.objects.filter(user=request.user).first()
-        buyer_form = BuyerForm(data=request.POST, instance=user_profile)
+        buyer_profile = Profile.objects.filter(user=request.user).first()
+        buyer_form = BuyerForm(data=request.POST, instance=buyer_profile)
         if buyer_form.is_valid():
             buyer_form.save()
 
-        return redirect("profile")
+        return redirect("buyer_profile")
 
 
-class SellerProfileView(TemplateView, View):
+class SellerProfileView(LoginRequiredMixin, TemplateView):
     template_name = "seller/profile.html"
 
     def get(self, request):
 
         if request.user.user_type != "Seller":
-            return redirect("profile")
+            return redirect("buyer_profile")
 
         seller_profile = Profile.objects.filter(user=request.user).first()
         if not seller_profile:
@@ -133,7 +188,7 @@ class SellerProfileView(TemplateView, View):
         if seller_form.is_valid():
             seller_form.save()
 
-        return redirect("seller")
+        return redirect("seller_profile")
 
 
 # ***********************************************Dashboard************************************************************
@@ -145,16 +200,17 @@ class BuyerDashboardView(TemplateView):
     template_name = "buyer/dashboard_buyer.html"
 
     def get(self, request, *args, **kwargs):
-        user_profile = Profile.objects.filter(user=request.user).first()
 
-        if user_profile and user_profile.choice == "Buyer":
-            context = {
-                "profile": user_profile,
-            }
-        else:
-            context = {}
+        if not request.user.is_authenticated:
+            return redirect("/")
 
-        return self.render_to_response(context)
+        if request.user.user_type != "Buyer":
+            messages.error(
+                request, "You are not authorized to view this page."
+            )
+            return redirect("/")
+
+        return render(request, self.template_name)
 
 
 # seller Dashboard
@@ -164,17 +220,17 @@ class SellerDashboardView(TemplateView):
     template_name = "seller/dashboard_seller.html"
 
     def get(self, request, *args, **kwargs):
-        user_profile = Profile.objects.filter(user=request.user).first()
-        if not user_profile:
+
+        if not request.user.is_authenticated:
+            return redirect("/")
+
+        if request.user.user_type != "Seller":
             messages.error(
                 request, "You are not authorized to view this page."
             )
             return redirect("/")
 
-        context = {
-            "seller_profile": user_profile,
-        }
-        return self.render_to_response(context)
+        return render(request, self.template_name)
 
 
 class CreateProductBySellerView(TemplateView):
@@ -253,7 +309,6 @@ class UpdateSellerProductView(View):
         )
 
 
-# Buyer Dashboard
 # Home Page
 
 
@@ -296,14 +351,12 @@ class StoreView(TemplateView):
 
         products = Product.objects.all()
 
-        # Filter by product name if search query is provided
         if product_name:
             products = products.filter(product_name__icontains=product_name)
             if not products.exists():
                 messages.error(request, "Oops! Product or category not found.")
             return render(request, self.template_name, {"products": products})
 
-        # Filter by category if category name is provided
         if category_name:
             category = Category.objects.filter(
                 category_name=category_name
@@ -311,16 +364,13 @@ class StoreView(TemplateView):
             if category:
                 products = products.filter(category=category)
 
-        # Filter by price range if both min_price and max_price are provided
         if min_price and max_price:
             products = products.filter(
                 price__gte=min_price, price__lte=max_price
             )
 
-        # Fetch all categories for display
         categories = Category.objects.all()
 
-        # Fetch the user's cart and count the items if the user is authenticated
         if request.user.is_authenticated:
             cart = Cart.objects.filter(buyer=request.user).first()
             if cart:
@@ -434,6 +484,45 @@ class RemoveView(TemplateView):
 # order page review the cart items
 
 
+class OrderCompleteView(TemplateView):
+    template_name = "order_complete.html"
+
+    def get(self, request, *args, **kwargs):
+        stripe_id = self.kwargs.get("stripe_id")
+        payment = Payment.objects.filter(stripe_id=stripe_id).first()
+
+        if payment:
+            order = payment.order
+            context = {
+                "order": order,
+                "payment": payment,
+            }
+        else:
+            context = {
+                "order": None,
+                "payment": None,
+                "error": "Payment not found",
+            }
+
+        return self.render_to_response(context)
+
+
+class OrderHistoryView(TemplateView):
+    template_name = "buyer/dashboard_buyer.html"
+
+    def get(self, request, *args, **kwargs):
+        orders = Order.objects.filter(buyer=request.user).order_by(
+            "-ordered_at"
+        )
+        context = {
+            "orders": orders,
+        }
+        return render(request, self.template_name, context)
+
+
+# ************************************Payment************************************************************
+
+
 class OrderView(TemplateView):
     template_name = "place-order.html"
 
@@ -450,40 +539,203 @@ class OrderView(TemplateView):
             return redirect("cart_view")
 
         cart_items = CartItem.objects.filter(cart=cart)
-
         if not cart_items:
             messages.error(request, "Your cart is empty")
             return redirect("cart_view")
 
-        total_price = sum(
-            item.quantity * item.product.price for item in cart_items
-        )
+        # Calculate total price, tax, and final total
+        total_price = 0.0
+        tax_rate = 0.10
+        for item in cart_items:
+            item.total_price = float(item.product.price) * float(item.quantity)
+            total_price += item.total_price
+
+        tax = total_price * tax_rate
+        final_total = total_price + tax
 
         context = {
+            "cart": cart,
             "cart_items": cart_items,
             "total_price": total_price,
+            "tax": tax,
+            "final_total": final_total,
         }
 
-        if "place_order" in request.GET:
-            order = Order.objects.create(
-                buyer=request.user,
-                total_price=total_price,
-                is_paid=False,
-            )
-
-            for item in cart_items:
-                OrderItem.objects.create(
-                    order=order,
-                    product=item.product,
-                    quantity=item.quantity,
-                    price=item.product.price,
-                )
-
-            cart_items.delete()
-
-            messages.success(
-                request, "Your order has been placed successfully"
-            )
-            return redirect("/")
-
         return self.render_to_response(context)
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            messages.error(
+                request, "You need to be logged in to place an order"
+            )
+            return redirect("login")
+
+        cart = Cart.objects.filter(buyer=request.user).first()
+        cart_items = CartItem.objects.filter(cart=cart)
+
+        total_price = 0.0
+        tax_rate = 0.10
+        for item in cart_items:
+            item.total_price = float(item.product.price) * float(item.quantity)
+            total_price += item.total_price
+
+        tax = total_price * tax_rate
+        final_total = total_price + tax
+
+        # Create the order
+        order = Order.objects.create(
+            buyer=request.user,
+            total_price=final_total,
+            is_paid=False,
+        )
+
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price,
+            )
+
+        cart_items.delete()
+
+        # Stripe payment setup
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        success_url = (
+            request.build_absolute_uri(reverse("success"))
+            + f"?order_id={order.id}"
+        )
+
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "inr",
+                        "product_data": {
+                            "name": f"Order {order.id}",
+                        },
+                        "unit_amount": int(final_total * 100),
+                    },
+                    "quantity": 1,
+                }
+            ],
+            mode="payment",
+            success_url=success_url,
+            # cancel_url=cancel_url,
+        )
+
+        # Create a Payment record
+        Payment.objects.create(
+            user=request.user,
+            order=order,
+            amount=final_total,
+            payment_method="stripe",
+            payment_status="pending",
+            transaction_id=checkout_session.id,
+        )
+
+        return redirect(checkout_session.url, code=303)
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+class StripeWebhookView(View):
+    def post(self, request, *args, **kwargs):
+        payload = request.body
+        sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+        endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+
+        if not sig_header or not payload:
+            return JsonResponse({"status": "invalid request"}, status=400)
+
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
+        except (ValueError, stripe.error.SignatureVerificationError):
+            return JsonResponse(
+                {"status": "invalid signature or payload"}, status=400
+            )
+
+        if event.get("type") == "checkout.session.completed":
+            session = event["data"]["object"]
+            stripe_payment_id = session.get("id")
+            payment_intent = session.get("payment_intent")
+
+            if stripe_payment_id and payment_intent:
+                payment = Payment.objects.filter(
+                    stripe_id=stripe_payment_id
+                ).first()
+                if payment:
+                    payment.payment_status = "successful"
+                    payment.transaction_id = payment_intent
+                    payment.save()
+
+        return JsonResponse({"status": "success"}, status=200)
+
+
+# Payment success
+
+
+class SuccessView(TemplateView):
+    template_name = "success.html"
+
+    def get(self, request, *args, **kwargs):
+        order_id = request.GET.get("order_id")
+        if order_id:
+            payment = Payment.objects.filter(order__id=order_id).first()
+            if payment and payment.payment_status == "pending":
+                # Assuming the payment was successful at this point
+                payment.payment_status = "successful"
+                payment.save()
+
+            # Pass the order and payment objects to the template
+            context = {
+                "order": payment.order,
+                "payment": payment,
+            }
+            return self.render_to_response(context)
+
+        return super().get(request, *args, **kwargs)
+
+
+# ******************************* Password *************************************************************
+
+
+# Change Password
+
+
+class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
+    form_class = PasswordChangeForm
+    template_name = "password/change_pw.html"
+
+    def get_success_url(self):
+        user = self.request.user
+        if user.user_type == "Seller":
+            return reverse("seller_dashboard")
+        else:
+            return reverse("buyer_dashboard")
+
+
+# Forget Passwords:-
+
+
+class ResetPasswordView(auth_views.PasswordResetView):
+    template_name = "password/pw_reset_form.html"
+    email_template_name = "password/pw_reset_email.html"
+    success_url = reverse_lazy("reset_done")
+
+
+class ResetDoneView(auth_views.PasswordResetDoneView):
+    template_name = "password/pw_reset_done.html"
+
+
+class ResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = "password/pw_reset_confirm.html"
+    success_url = reverse_lazy("reset_complete")
+
+
+class ResetCompleteView(auth_views.PasswordResetCompleteView):
+    template_name = "password/pw_reset_complete.html"
