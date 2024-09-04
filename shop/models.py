@@ -1,8 +1,9 @@
+import uuid
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import AbstractUser
 from shop.managers import UserManager
-import uuid
 
 
 class TimesStampedModel(models.Model):
@@ -27,16 +28,28 @@ class User(AbstractUser, TimesStampedModel):
         max_length=10, choices=USER_TYPE_CHOICES, default="Buyer"
     )
     email_verified = models.BooleanField(default=False)
-    verification_code = models.CharField(max_length=36, blank=True)
+    verification_code = models.CharField(max_length=100, blank=True, null=True)
+    token_created_at = models.DateTimeField(blank=True, null=True)
     is_approved = models.BooleanField(default=False)
 
     objects = UserManager()
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email
+
+    def generate_verification_code(self):
+        self.verification_code = str(uuid.uuid4())
+        self.token_created_at = timezone.now()
+        self.save()
+
+    def is_token_valid(self):
+        if self.token_created_at:
+            return (
+                timezone.now() - self.token_created_at
+            ) < timezone.timedelta(hours=24)
+        return False
 
 
 class Profile(TimesStampedModel):
@@ -44,7 +57,7 @@ class Profile(TimesStampedModel):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="profile"
     )
-    phone_number = models.CharField(max_length=20, blank=True)
+    phone_number = models.PositiveIntegerField()
     profile_picture = models.ImageField(
         upload_to="profile_pictures/", blank=True
     )
@@ -136,8 +149,15 @@ class OrderItem(TimesStampedModel):
 
 
 class Payment(TimesStampedModel):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey
+    stripe_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=255)
@@ -145,7 +165,7 @@ class Payment(TimesStampedModel):
     transaction_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"Payment {self.id} for order {self.order.id}"
+        return f"Payment {self.stripe_id} for order {self.order.id}"
 
 
 class Cart(TimesStampedModel):
