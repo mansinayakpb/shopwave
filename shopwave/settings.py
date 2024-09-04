@@ -12,13 +12,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Now you can access environment variables
-SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,8 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "shop"
-
+    "shop",
 ]
 
 MIDDLEWARE = [
@@ -65,7 +65,7 @@ ROOT_URLCONF = "shopwave.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -128,10 +128,10 @@ USE_TZ = True
 
 # settings.py
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Project-level static files
+    os.path.join(BASE_DIR, "static"),  # Project-level static files
 ]
 
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory for collectstatic
@@ -142,8 +142,18 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
-AUTH_USER_MODEL = 'shop.User'
+AUTH_USER_MODEL = "shop.User"
+
+STRIPE_SECRET_KEY = "sk_test_51PtQGiRxHr5M7rOV5sfkvD9iOmIUrmspEx5MXWsPk2urm961jhkrQhnsJUgCddszXpnCbrLcaPQ6K2AO9sSG8mF500lfsqxA3A"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51PtQGiRxHr5M7rOVBk9Kly7zqfeTCwj2jt5Y6Pz9aXppkGsBKkDGBoGFhuQxXn66FSIjpNYmrF1FKT2VVKjVFn1D008SQeIf5C"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "nayak.mansi09@gmail.com"
+EMAIL_HOST_PASSWORD = "sbdn esrx mhvj ckkg"
