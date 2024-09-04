@@ -13,17 +13,8 @@ from django.views.generic import TemplateView, View
 
 from .email_utils import send_verification_email
 from .forms import BuyerForm, SellerDashboardForm, SellerForm, SignUpForm
-from .models import (
-    Cart,
-    CartItem,
-    Category,
-    Order,
-    OrderItem,
-    Payment,
-    Product,
-    Profile,
-    User,
-)
+from .models import (Cart, CartItem, Category, Order, OrderItem, Payment,
+                     Product, Profile, User)
 
 # **************************************Authentication*****************************************************
 
