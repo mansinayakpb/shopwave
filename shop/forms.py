@@ -1,16 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 
-from .models import (
-    Cart,
-    CartItem,
-    Category,
-    Order,
-    OrderItem,
-    Product,
-    Profile,
-    User,
-)
+from .models import (Cart, CartItem, Category, Order, OrderItem, Product,
+                     Profile, User)
 
 
 class CategoryForm(forms.ModelForm):
