@@ -1,15 +1,16 @@
 from django import forms
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
+
 from .models import (
-    User,
-    Profile,
-    Category,
-    Product,
-    Order,
-    OrderItem,
     Cart,
     CartItem,
+    Category,
+    Order,
+    OrderItem,
+    Product,
+    Profile,
+    User,
 )
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
 class CategoryForm(forms.ModelForm):
@@ -198,7 +199,7 @@ class SellerForm(forms.ModelForm):
         }
 
 
-# form tp create product by seller in dashboard
+# form to create product by seller in dashboard
 
 
 class SellerDashboardForm(forms.ModelForm):
