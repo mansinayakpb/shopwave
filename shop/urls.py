@@ -2,35 +2,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 
-from .views import (
-    ActivateAccountView,
-    AddToCartView,
-    BuyerDashboardView,
-    BuyerProfileView,
-    CartView,
-    ChangePasswordView,
-    CreateProductBySellerView,
-    Home,
-    OrderCompleteView,
-    OrderHistoryView,
-    OrderView,
-    ProductView,
-    QuantityView,
-    RemoveView,
-    ResetCompleteView,
-    ResetConfirmView,
-    ResetDoneView,
-    ResetPasswordView,
-    SellerDashboardView,
-    SellerProductsView,
-    SellerProfileView,
-    SignUpView,
-    StoreView,
-    SuccessView,
-    UpdateSellerProductView,
-    UserLoginView,
-    UserLogoutView,
-)
+from .views import (ActivateAccountView, AddToCartView, BuyerDashboardView,
+                    BuyerProfileView, CartView, ChangePasswordView,
+                    CreateProductBySellerView, Home, OrderCompleteView,
+                    OrderHistoryView, OrderView, ProductView, QuantityView,
+                    RemoveView, ResetCompleteView, ResetConfirmView,
+                    ResetDoneView, ResetPasswordView, SellerDashboardView,
+                    SellerProductsView, SellerProfileView, SignUpView,
+                    StoreView, SuccessView, UpdateSellerProductView,
+                    UserLoginView, UserLogoutView)
 
 urlpatterns = [
     path("", Home.as_view(), name="home"),
