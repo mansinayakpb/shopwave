@@ -66,13 +66,7 @@
                                 {% if request.user.is_authenticated %}
                                 <a href="{% url 'home' %}">Home</a> <span class="dark-transp"> | </span>
                                 <a href="{% url 'logout' %}">Logout</a> <span class="dark-transp"> | </span>
-                                {% comment %} {% if request.user.choice == 'Seller' %} {% endcomment %}
-                                    {% comment %} <a href="{% url 'profile' %}">Dashboard</a> <span class="dark-transp"> | </span>
-                                {% else %} {% endcomment %}
-                                    <a href="{% url 'seller_dashboard' %}">Dashboard</a> <span class="dark-transp">  </span>
-                                {% comment %} {% endif %} {% endcomment %}
-
-
+                                    <a href="{% url 'seller_dashboard' %}">Dashboard</a> <span class="dark-transp">  </span>                    
                                 {% else %} 
                                     <a href="{% url 'login' %}">Login</a> <span class="dark-transp"> | </span>
                                     <a href="{% url 'signup' %}">Register</a>

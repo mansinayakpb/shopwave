@@ -61,23 +61,3 @@
 
 {% endblock %}
 
-
-
-{% block body_content %}
-<!-- Display seller-specific fields if the user is a seller -->
-{% if is_seller %}
-    {% if form.gst %}
-        <div class="mb-3">
-            <label for="gst" class="form-label">GST Number</label>
-            {{ form.gst }}
-        </div>
-    {% endif %}
-
-    {% if form.pan_number %}
-        <div class="mb-3">
-            <label for="pan_number" class="form-label">PAN Number</label>
-            {{ form.pan_number }}
-        </div>
-    {% endif %}
-{% endif %}
-{% endblock %}
