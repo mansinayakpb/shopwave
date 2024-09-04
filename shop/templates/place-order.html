@@ -98,7 +98,7 @@
 </div> <!-- card-body.// -->
 </article> <!-- card.// -->
 
-<article class="accordion" id="accordion_pay">
+{% comment %} <article class="accordion" id="accordion_pay">
 	<div class="card">
 		<header class="card-header">
 			<img src="{% static './images/misc/payment-paypal.png' %}" class="float-right" height="24">
@@ -138,7 +138,7 @@
 	</div> <!-- collapse .// -->
 	</div> <!-- card.// -->
 
-</article>
+</article> {% endcomment %}
 <!-- accordion end.// -->
 
 		</main> <!-- col.// -->
@@ -147,21 +147,26 @@
 		<div class="card-body">
 			<dl class="dlist-align">
 			  <dt>Total price:</dt>
-			  <dd class="text-right">{{ total_price }}</dd>
+			  <dd class="text-right">₹{{ total_price|floatformat:2 }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Tax:</dt>
-			  <dd class="text-right">{{ tax }}</dd>
+			  <dd class="text-right">{{ tax|floatformat:2 }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Total:</dt>
-			  <dd class="text-right text-dark b"><strong>{{ final_total }}</strong></dd>
+			  <dd class="text-right text-dark b"><strong>₹{{ final_total|floatformat:2 }}</strong></dd>
 			</dl>
 			<hr>
 			<p class="text-center mb-3">
 				<img src="{% static './images/misc/payments.png' %}" height="26">
 			</p>
-			<button type="submit" class="btn btn-primary btn-block"> Place Order </button>
+			<form action="{% url 'order_place' %}" method="post">
+				{% csrf_token %}
+				<!-- Form Fields Here -->
+				<button type="submit" class="btn btn-primary btn-block"> Place Order </button>
+			</form>
+			{% comment %} <button type="submit" class="btn btn-primary btn-block"> Place Order </button> {% endcomment %}
 		</div> <!-- card-body.// -->
 		</div> <!-- card.// -->
 		</aside> <!-- col.// -->

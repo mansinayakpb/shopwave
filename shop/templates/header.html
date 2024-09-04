@@ -80,7 +80,7 @@
                                 <a href="{% url 'home' %}">Home</a> <span class="dark-transp"> | </span>
                                 <a href="{% url 'logout' %}">Logout</a> <span class="dark-transp"> | </span>
                                 {% if request.user.user_type == 'Buyer' %}
-                                    <a href="{% url 'profile' %}">Profile</a> <span class="dark-transp"> | </span>
+                                    <a href="{% url 'buyer_dashboard' %}">Dashboard</a> <span class="dark-transp">  </span>
                                 {% else %}
                                     <a href="{% url 'seller_dashboard' %}">Dashboard</a> <span class="dark-transp"> 
                                 {% endif %}
@@ -104,13 +104,3 @@
     </section> <!-- header-main .// -->
 
 </header> <!-- section-header.// -->
-
-
-
-
-
-
-
-
-
-

@@ -13,6 +13,10 @@
                 {{ form.as_p }}
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary btn-block">Login</button>
+                        <a href="{% url 'password_reset' %}">Forgot Password</a>
+                    {% comment %} <button type="submit">Log In</button><br>
+                    <button type="button" onclick="window.location.href='/'">Home</button> {% endcomment %}
+
                 </div>
             </form>
             {% if messages %}
@@ -23,6 +27,7 @@
         </article><!-- card-body.// -->
     </div> <!-- card .// -->
     <p class="text-center mt-4">Don't have an account? <a href="{% url 'signup' %}">Register</a></p>
+    
     <br><br>
     <!-- ============================ COMPONENT REGISTER END.// ================================= -->
 
