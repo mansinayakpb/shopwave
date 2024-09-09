@@ -1,10 +1,8 @@
 import uuid
-
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-
 from shop.managers import UserManager
 
 
@@ -59,7 +57,7 @@ class Profile(TimesStampedModel):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="profile"
     )
-    phone_number = models.PositiveIntegerField()
+    phone_number = models.BigIntegerField()
     profile_picture = models.ImageField(
         upload_to="profile_pictures/", blank=True
     )
