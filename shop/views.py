@@ -53,6 +53,7 @@ class UserLoginView(TemplateView):
         if request.user.is_authenticated:
             return redirect("/")
         else:
+            
             form = AuthenticationForm()
             return render(request, self.template_name, {"form": form})
 
@@ -301,7 +302,6 @@ class UpdateSellerProductView(View):
 
 # Home Page
 
-
 class Home(TemplateView):
     template_name = "home.html"
 
@@ -376,7 +376,6 @@ class StoreView(TemplateView):
 
 # ************************************************Cart**************************************************
 # Display the Cart Page
-
 
 class CartView(TemplateView):
     template_name = "cart.html"
@@ -729,3 +728,9 @@ class ResetConfirmView(auth_views.PasswordResetConfirmView):
 
 class ResetCompleteView(auth_views.PasswordResetCompleteView):
     template_name = "password/pw_reset_complete.html"
+
+
+
+
+
+
