@@ -211,3 +211,5 @@ class SellerDashboardForm(forms.ModelForm):
         widgets = {
             "description": forms.Textarea(attrs={"rows": 4}),
         }
+
+
