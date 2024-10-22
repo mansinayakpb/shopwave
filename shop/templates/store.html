@@ -5,7 +5,6 @@
 <section class="section-pagetop bg">
 <div class="container">
 	<h2 class="title-page">Our Store</h2>
-
 </div> <!-- container //  -->
 </section>
 <!-- ========================= SECTION INTRO END// ========================= -->
@@ -13,128 +12,245 @@
 <!-- ========================= SECTION CONTENT ========================= -->
 <section class="section-content padding-y">
 <div class="container">
-
 <div class="row">
 	<aside class="col-md-3">
-
-<div class="card">
-	<article class="filter-group">
-		<header class="card-header">
-			<a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
-				<i class="icon-control fa fa-chevron-down"></i>
-				<h6 class="title">Categories</h6>
-			</a>
-		</header>
-		<div class="filter-content collapse show" id="collapse_1" style="">
-			<div class="card-body">
-				<ul class="list-menu">
-					{% for category in categories %}
-						{% comment %} <li><a class="dropdown-item" href="{% url 'product' category.id %}">{{ category.category_name }}</a></li> {% endcomment %}
-						<li><a class="dropdown-item" href="{% url 'store' %}?category={{ category.category_name }}">{{ category.category_name }}</a></li>
-
-						{% comment %} <li><a href="{% url 'product' category.id %}">{{ category.category_name }}</a></li> {% endcomment %}
-						{% comment %} <li><a href="{% url 'product_by_category_name' category.pk %}">{{ category.pk }}</a></li> {% endcomment %}
-					    
-					{% endfor %}
-				</ul>
-				
-
-			</div> <!-- card-body.// -->
-		</div>
-	</article> <!-- filter-group  .// -->
-	
-
-	<article class="filter-group">
-		<header class="card-header">
-			<a href="#" data-toggle="collapse" data-target="#collapse_3" aria-expanded="true" class="">
-				<i class="icon-control fa fa-chevron-down"></i>
-				<h6 class="title">Price range</h6>
-			</a>
-		</header>
-		<div class="filter-content collapse show" id="collapse_3">
-			<div class="card-body">
-				<form method="get" action="{% url 'store' %}">
-					<div class="form-row">
-						<div class="form-group col-md-6">
-							<label>Min</label>
-							<select name="min_price" class="mr-2 form-control">
-								<option value="0">₹0</option>
-								<option value="50">₹50</option>
-								<option value="100">₹100</option>
-								<option value="150">₹150</option>
-								<option value="200">₹200</option>
-								<option value="500">₹500</option>
-								<option value="1000">₹1000</option>
-							</select>
-						</div>
-						<div class="form-group text-right col-md-6">
-							<label>Max</label>
-							<select name="max_price" class="mr-2 form-control">
-								<option value="50">₹50</option>
-								<option value="100">₹100</option>
-								<option value="150">₹150</option>
-								<option value="200">₹200</option>
-								<option value="500">₹500</option>
-								<option value="1000">₹1000</option>
-								<option value="2000">₹2000+</option>
-							</select>
-						</div>
-					</div>
-					<button type="submit" class="btn btn-block btn-primary">Apply</button>
-				</form>
-			</div><!-- card-body.// -->
-		</div>
-	</article> <!-- filter-group .// -->
-
-</div> <!-- card.// -->
-
+		<!-- Existing filters and categories -->
 	</aside> <!-- col.// -->
 	<main class="col-md-9">
+		<header class="border-bottom mb-4 pb-3">
+			<div class="form-inline">
+				<span class="mr-md-auto">10 Items found </span>
+			</div>
+		</header><!-- sect-heading -->
 
-<header class="border-bottom mb-4 pb-3">
-		<div class="form-inline">
-			<span class="mr-md-auto">10 Items found </span>
+		<div class="row">
+		    {% for product in products|slice:":10" %}
+			<div class="col-md-4">
+				<div class="card card-product-grid">
+					<a href="{% url 'product' product.id %}" class="img-wrap">
+						{% if product.image %}
+							<img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+						{% else %}
+							<img src="{% static 'images/placeholder.jpg' %}" alt="Placeholder Image">
+						{% endif %}
+					</a>
+					<figcaption class="info-wrap">
+						<a href="{% url 'product' product.id %}" class="title">{{ product.product_name }}</a>
+						
+						<!-- Discount calculation -->
+						{% if request.session.discount_percentage %}
+							{% with discount_percentage=request.session.discount_percentage|floatformat:0 %}
+								{% with original_price=product.price %}
+									<div class="price mt-1">
+										<p>Original Price: <del>₹{{ original_price }}</del></p>
+										<p style="color:green;">
+											Discounted Price: ₹{{ original_price|floatformat:2|mul:"1"|sub:original_price|mul:discount_percentage|div:100 }}
+										</p>
+										<p>{{ discount_percentage }}% off</p>
+									</div>
+								{% endwith %}
+							{% endwith %}
+						{% else %}
+							<!-- Show original price if no discount is applied -->
+							<div class="price mt-1">₹{{ product.price }}</div>
+						{% endif %}
+					</figcaption>
+				</div>
+			</div> <!-- col.// -->
+			{% endfor %}
+		</div> <!-- row.// -->
 
-		</div>
-</header><!-- sect-heading -->
+	</div> <!-- row end.// -->
 
-<div class="row">
-			{% for product in products|slice:":10" %}
-	<div class="col-md-4">
-		<div class="card card-product-grid">
-			<a href="{% url 'product' product.id %}" class="img-wrap">
-				{% if product.image %}
-					<img src="{{ product.image.url }}" alt="{{ product.product_name }}">
-				{% else %}
-					<img src="{% static 'images/placeholder.jpg' %}" alt="Placeholder Image">
-				{% endif %}
-			</a>
-			<figcaption class="info-wrap">
-				<a href="{% url 'product' product.id %}" class="title">{{ product.product_name }}</a>
-				<div class="price mt-1">₹{{ product.price }}</div>
-			</figcaption>
-		</div>
-	</div> <!-- col.// -->
-	{% endfor %}
-</div> <!-- row.// -->
-</div> <!-- row end.// -->
-
-<nav class="mt-4" aria-label="Page navigation sample">
-  <ul class="pagination">
-    <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-    <li class="page-item"><a class="page-link" href="#">2</a></li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
-    <li class="page-item"><a class="page-link" href="#">Next</a></li>
-  </ul>
-</nav>
+	<nav class="mt-4" aria-label="Page navigation sample">
+	  <ul class="pagination">
+	    <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+	    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+	    <li class="page-item"><a class="page-link" href="#">2</a></li>
+	    <li class="page-item"><a class="page-link" href="#">3</a></li>
+	    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+	  </ul>
+	</nav>
 
 	</main> <!-- col.// -->
 
 </div>
-
 </div> <!-- container .//  -->
 </section>
-
-
 {% endblock body_content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+{% block body_content %}
+  <!-- ========================= SECTION PAGETOP ========================= -->
+  <section class="section-pagetop bg">
+    <div class="container">
+      <h2 class="title-page">Our Store</h2>
+    </div>
+  </section>
+  <!-- ========================= SECTION PAGETOP END// ========================= -->
+
+  <!-- ========================= SECTION CONTENT ========================= -->
+  <section class="section-content padding-y">
+    <div class="container">
+      <div class="row">
+        <aside class="col-md-3">
+          <!-- Filters and categories section -->
+          <div class="card">
+            <article class="filter-group">
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Categories</h6>
+                </a>
+              </header>
+              <div class="filter-content collapse show" id="collapse_1">
+                <div class="card-body">
+                  <ul class="list-menu">
+                    {% for category in categories %}
+                      <li><a href="{% url 'store' %}?category={{ category.category_name }}">{{ category.category_name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </article>
+
+            <article class="filter-group">
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_3" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Price range</h6>
+                </a>
+              </header>
+              <div class="filter-content collapse show" id="collapse_3">
+                <div class="card-body">
+                  <form method="get" action="{% url 'store' %}">
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label>Min</label>
+                        <select name="min_price" class="mr-2 form-control">
+                          <option value="0">₹0</option>
+                          <option value="50">₹50</option>
+                          <option value="100">₹100</option>
+                          <option value="150">₹150</option>
+                          <option value="200">₹200</option>
+                          <option value="500">₹500</option>
+                          <option value="1000">₹1000</option>
+                        </select>
+                      </div>
+                      <div class="form-group text-right col-md-6">
+                        <label>Max</label>
+                        <select name="max_price" class="mr-2 form-control">
+                          <option value="50">₹50</option>
+                          <option value="100">₹100</option>
+                          <option value="150">₹150</option>
+                          <option value="200">₹200</option>
+                          <option value="500">₹500</option>
+                          <option value="1000">₹1000</option>
+                          <option value="2000">₹2000+</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button type="submit" class="btn btn-block btn-primary">Apply</button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          </div>
+        </aside>
+
+        <main class="col-md-9">
+          <header class="border-bottom mb-4 pb-3">
+            <div class="form-inline">
+              <span class="mr-md-auto">{{ products.count }} Items found</span>
+            </div>
+          </header>
+
+          <div class="row">
+            {% for product in products|slice:':10' %}
+              <div class="col-md-4">
+                <div class="card card-product-grid">
+                  <a href="{% url 'product' product.id %}" class="img-wrap">
+                    {% if product.image %}
+                      <img src="{{ product.image.url }}" alt="{{ product.product_name }}" />
+                    {% else %}
+                      <img src="{% static 'images/placeholder.jpg' %}" alt="Placeholder Image" />
+                    {% endif %}
+                  </a>
+                  <figcaption class="info-wrap">
+                    <a href="{% url 'product' product.id %}" class="title">{{ product.product_name }}</a>
+
+                    {% for item in discounted_products %}
+                      {% if item.product.id == product.id %}
+                        <div class="product">
+                          {% if item.discount_percentage > 0 %}
+                            <div class="price mt-1">
+                              <span style="text-decoration: line-through;">₹{{ item.product.price }}</span>
+                              ₹{{ item.discounted_price|floatformat:2 }}
+                              <span style="color: green;">({{ item.discount_percentage|floatformat:0 }}% off)</span>
+                            </div>
+                          {% else %}
+                            <div class="price mt-1">₹{{ item.product.price }}</div>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </figcaption>
+                </div>
+              </div> <!-- col.// -->
+            {% endfor %}
+          </div>
+
+          <nav class="mt-4" aria-label="Page navigation sample">
+            <ul class="pagination">
+              <li class="page-item disabled">
+                <a class="page-link" href="#">Previous</a>
+              </li>
+              <li class="page-item active">
+                <a class="page-link" href="#">1</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">2</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">3</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+        </main>
+      </div>
+    </div>
+  </section>
+{% endblock %} {% endcomment %}
