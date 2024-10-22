@@ -10,7 +10,7 @@ from .views import (ActivateAccountView, AddToCartView, BuyerDashboardView,
                     ResetDoneView, ResetPasswordView, SellerDashboardView,
                     SellerProductsView, SellerProfileView, SignUpView,
                     StoreView, SuccessView, UpdateSellerProductView,
-                    UserLoginView, UserLogoutView)
+                    UserLoginView, UserLogoutView, ApplyDiscountView)
 
 urlpatterns = [
     path("", Home.as_view(), name="home"),
@@ -74,6 +74,7 @@ urlpatterns = [
     path(
         "changepassword/", ChangePasswordView.as_view(), name="change_password"
     ),
+    path('apply-discount/', ApplyDiscountView.as_view(), name='apply_discount'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
