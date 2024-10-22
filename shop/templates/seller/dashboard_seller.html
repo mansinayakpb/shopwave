@@ -14,8 +14,77 @@
                 <a class="list-group-item" href="{% url 'seller_profile' %}">Profile</a>
                 <a class="list-group-item" href="{% url 'change_password' %}">Change Password</a>                
 
-                {% comment %} <a href="{% url 'seller_profile' %}">Profile</a> <span class="dark-transp"> | </span> {% endcomment %}
                 <a class="list-group-item" href="#">My Selling Items</a>
+                <a class="list-group-item" href="#">Received orders</a>
+                <a class="list-group-item" href="#">Transactions</a>
+                <a class="list-group-item" href="#">Settings</a>
+
+                {% if request.user.is_superuser %}
+                    <a class="list-group-item" href="{% url 'apply_discount' %}">Apply Discount</a>
+                {% endif %}
+            </ul>
+            <br>
+            <a class="btn btn-light btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a>
+            <!--   SIDEBAR .//END   -->
+        </aside>
+        <main class="col-md-9">
+            <!-- Seller-specific content -->
+            <article class="card">
+                <header class="card-header">
+                    <strong class="d-inline-block mr-3">My Selling Items</strong>
+                </header>
+                <div class="card-body">
+                    <!-- Example seller content, replace with dynamic content as needed -->
+                    <p>Here you can manage your selling items.</p>
+                </div>
+            </article>
+        </main>
+    </div> <!-- row.// -->
+</div>
+
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+
+{% endblock body_content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "seller/base_seller.html" %}
+{% load static %}
+{% block body_content %}
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-content padding-y bg">
+
+<div class="container">
+    <div class="row">
+        <aside class="col-md-3">
+            <!--   SIDEBAR   -->
+            <ul class="list-group">
+                <a class="list-group-item" href="{% url 'createproduct_seller' %}">Create a Product</a>
+                <a class="list-group-item" href="{% url 'myproducts_seller' %}">My Products</a>
+                <a class="list-group-item" href="{% url 'seller_profile' %}">Profile</a>
+                <a class="list-group-item" href="{% url 'change_password' %}">Change Password</a>                
+
+                {% comment %} <a href="{% url 'seller_profile' %}">Profile</a> <span class="dark-transp"> | </span> {% endcomment %}
+                {% comment %} <a class="list-group-item" href="#">My Selling Items</a>
                 <a class="list-group-item" href="#">Received orders</a>
                 <a class="list-group-item" href="#">Transactions</a>
                 <a class="list-group-item" href="#">Settings</a>
@@ -42,5 +111,5 @@
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
 
-{% endblock body_content %}
+{% endblock body_content %} {% endcomment %}
 
