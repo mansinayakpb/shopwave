@@ -10,8 +10,10 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, View
+
 from .email_utils import send_verification_email
-from .forms import BuyerForm, SellerDashboardForm, SellerForm, SignUpForm
+from .forms import (BuyerForm, DiscountForm, SellerDashboardForm, SellerForm,
+                    SignUpForm)
 from .models import (Cart, CartItem, Category, Order, OrderItem, Payment,
                      Product, Profile, User)
 
@@ -47,13 +49,13 @@ class SignUpView(TemplateView):
 
 
 class UserLoginView(TemplateView):
-    template_name = "signin/login.html"  # Retaining the original template
+    template_name = "signin/login.html"
 
     def get(self, request):
         if request.user.is_authenticated:
             return redirect("/")
         else:
-            
+
             form = AuthenticationForm()
             return render(request, self.template_name, {"form": form})
 
@@ -302,6 +304,7 @@ class UpdateSellerProductView(View):
 
 # Home Page
 
+
 class Home(TemplateView):
     template_name = "home.html"
 
@@ -377,30 +380,30 @@ class StoreView(TemplateView):
 # ************************************************Cart**************************************************
 # Display the Cart Page
 
-class CartView(TemplateView):
-    template_name = "cart.html"
+# class CartView(TemplateView):
+#     template_name = "cart.html"
 
-    def get(self, request):
-        cart = Cart.objects.filter(buyer=request.user).first()
-        cart_items = CartItem.objects.filter(cart=cart)
+#     def get(self, request):
+#         cart = Cart.objects.filter(buyer=request.user).first()
+#         cart_items = CartItem.objects.filter(cart=cart)
 
-        total_price = 0.0
-        tax_rate = 0.10
-        for item in cart_items:
-            item.total_price = float(item.product.price) * float(item.quantity)
-            total_price += item.total_price
+#         total_price = 0.0
+#         tax_rate = 0.10
+#         for item in cart_items:
+#             item.total_price = float(item.product.price) * float(item.quantity)
+#             total_price += item.total_price
 
-        tax = total_price * tax_rate
-        final_total = total_price + tax
+#         tax = total_price * tax_rate
+#         final_total = total_price + tax
 
-        context = {
-            "cart": cart,
-            "cart_items": cart_items,
-            "total_price": total_price,
-            "tax": tax,
-            "final_total": final_total,
-        }
-        return render(request, self.template_name, context)
+#         context = {
+#             "cart": cart,
+#             "cart_items": cart_items,
+#             "total_price": total_price,
+#             "tax": tax,
+#             "final_total": final_total,
+#         }
+#         return render(request, self.template_name, context)
 
 
 # Add the product into the cart
@@ -428,6 +431,39 @@ class AddToCartView(View):
                 cart_item.save()
 
         return redirect("cart_view")
+
+
+class CartView(TemplateView):
+    template_name = "cart.html"
+
+    def get(self, request):
+        cart = Cart.objects.filter(buyer=request.user).first()
+        cart_items = CartItem.objects.filter(cart=cart)
+
+        total_price = 0.0
+        tax_rate = 0.10
+
+        for item in cart_items:
+            # Check for discounted price
+            if item.product.discounted_price is not None:
+                item_price = item.product.discounted_price
+            else:
+                item_price = item.product.price
+
+            item.total_price = float(item_price) * float(item.quantity)
+            total_price += item.total_price
+
+        tax = total_price * tax_rate
+        final_total = total_price + tax
+
+        context = {
+            "cart": cart,
+            "cart_items": cart_items,
+            "total_price": total_price,
+            "tax": tax,
+            "final_total": final_total,
+        }
+        return render(request, self.template_name, context)
 
 
 # Add the quantity of the product
@@ -536,7 +572,11 @@ class OrderView(TemplateView):
         total_price = 0.0
         tax_rate = 0.10
         for item in cart_items:
-            item.total_price = float(item.product.price) * float(item.quantity)
+            if item.product.discounted_price is not None:
+                item_price = item.product.discounted_price
+            else:
+                item_price = item.product.price
+            item.total_price = float(item_price) * float(item.quantity)
             total_price += item.total_price
 
         tax = total_price * tax_rate
@@ -565,7 +605,11 @@ class OrderView(TemplateView):
         total_price = 0.0
         tax_rate = 0.10
         for item in cart_items:
-            item.total_price = float(item.product.price) * float(item.quantity)
+            if item.product.discounted_price is not None:
+                item_price = item.product.discounted_price
+            else:
+                item_price = item.product.price
+            item.total_price = float(item_price) * float(item.quantity)
             total_price += item.total_price
 
         tax = total_price * tax_rate
@@ -730,7 +774,43 @@ class ResetCompleteView(auth_views.PasswordResetCompleteView):
     template_name = "password/pw_reset_complete.html"
 
 
+class ApplyDiscountView(TemplateView):
+    template_name = "seller/apply_discount.html"
 
+    def dispatch(self, request):
+        # Only admin can apply the discount
+        if not request.user.is_authenticated or not request.user.is_superuser:
+            messages.error(request, "Only the admin can apply discounts.")
+            return redirect("home")
+        return super().dispatch(request)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"] = DiscountForm()
+        return context
 
+    def post(self, request):
+        form = DiscountForm(request.POST)
+        if form.is_valid():
+            discount_percentage = form.cleaned_data["discount_percentage"]
+            start_date = form.cleaned_data["start_date"]
+            end_date = form.cleaned_data["end_date"]
+            categories = form.cleaned_data["category"]
 
+            if categories:
+                products = Product.objects.filter(category=categories)
+                print(products)
+            else:        
+            
+                # Apply discount to all products
+                products = Product.objects.all()
+            for product in products:
+                product.discount_percentage = discount_percentage
+                product.discount_start_date = start_date
+                product.discount_end_date = end_date
+                product.save()
+
+            messages.success(request, "Discount applied to all products.")
+            return redirect("store")                 
+
+        return self.render_to_response({"form": form})
