@@ -1,8 +1,11 @@
 import uuid
+from decimal import Decimal
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+
 from shop.managers import UserManager
 
 
@@ -90,6 +93,35 @@ class Category(TimesStampedModel):
         return self.category_name
 
 
+# class Product(TimesStampedModel):
+#     SIZE_CHOICES = [
+#         ("S", "S"),
+#         ("M", "M"),
+#         ("L", "L"),
+#         ("XL", "XL"),
+#         ("XXL", "XXL"),
+#     ]
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#     seller = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name="seller_products"
+#     )
+#     category = models.ForeignKey(
+#         "Category",
+#         on_delete=models.CASCADE,
+#         null=True,
+#         blank=True,
+#         related_name="category_products",
+#     )
+#     product_name = models.CharField(max_length=255)
+#     description = models.TextField(blank=True)
+#     price = models.DecimalField(max_digits=10, decimal_places=2)
+#     stock = models.PositiveIntegerField()
+#     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default="M")
+#     image = models.ImageField(upload_to="static/", null=True, blank=True)
+
+
+#     def __str__(self):
+#         return self.product_name
 class Product(TimesStampedModel):
     SIZE_CHOICES = [
         ("S", "S"),
@@ -115,9 +147,28 @@ class Product(TimesStampedModel):
     stock = models.PositiveIntegerField()
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default="M")
     image = models.ImageField(upload_to="static/", null=True, blank=True)
+    discount_percentage = models.DecimalField(
+        max_digits=5, decimal_places=0, null=True, blank=True
+    )
+    discount_start_date = models.DateField(null=True, blank=True)
+    discount_end_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.product_name
+
+    @property
+    def discounted_price(self):
+        """Calculate and return the discounted price if the discount is active."""
+        if (
+            self.discount_percentage
+            and self.discount_start_date
+            and self.discount_end_date
+        ):
+            today = timezone.now().date()
+            if self.discount_start_date <= today <= self.discount_end_date:
+                discount = Decimal(self.discount_percentage)
+                return self.price - (self.price * discount / 100)
+        return None
 
 
 class Order(TimesStampedModel):
