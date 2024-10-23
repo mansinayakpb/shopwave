@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
+from django.utils import timezone
 
 from .models import (Cart, CartItem, Category, Order, OrderItem, Product,
                      Profile, User)
@@ -213,3 +214,22 @@ class SellerDashboardForm(forms.ModelForm):
         }
 
 
+# class DiscountForm(forms.Form):
+#     event_name = forms.CharField(max_length=100)
+#     discount_percentage = forms.DecimalField(max_digits=5, decimal_places=2)
+#     start_date = forms.DateField(initial=timezone.now)
+#     end_date = forms.DateField()
+#     category = forms.CharField(max_length=100)
+
+
+class DiscountForm(forms.Form):
+    event_name = forms.CharField(max_length=100)
+    discount_percentage = forms.DecimalField(max_digits=5, decimal_places=2)
+    start_date = forms.DateField(initial=timezone.now)
+    end_date = forms.DateField()
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        required=False,  
+        empty_label="All Categories",  
+        widget=forms.Select(attrs={'class': 'toggle-category'})  
+    )
