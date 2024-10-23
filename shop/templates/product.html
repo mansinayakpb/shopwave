@@ -12,7 +12,18 @@
             <div class="col-md-6">
                 <h1>{{ product.product_name }}</h1>
                 <p>{{ product.description }}</p>
-                <p>Price: ₹{{ product.price }}</p>
+
+                <div class="price mt-1">
+                    {% if product.discounted_price %}
+                        <span style="color: green;">₹{{ product.discounted_price }}</span>
+                        <small><del>₹{{ product.price }}</del></small>
+                        <span class="badge badge-success" style="margin-left: 10px;">
+                            {{ product.discount_percentage }}% Off
+                    {% else %}
+                        Price: ₹{{ product.price }}
+                    {% endif %}
+                </div>
+
                 <p>Stock: {{ product.stock }}</p>
 
                 {% if request.user.user_type == 'Buyer' %}
@@ -30,6 +41,45 @@
 <!-- ========================= PRODUCT DETAILS END ========================= -->
 
 {% endblock body_content %}
+
+
+
+
+
+
+
+{% comment %} {% extends "base.html" %}
+{% load static %}
+{% block body_content %}
+
+<!-- ========================= PRODUCT DETAILS ========================= -->
+<section class="section-product-detail padding-y-sm">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <img src="{{ product.image.url }}" alt="{{ product.product_name }}" class="img-fluid">
+            </div>
+            <div class="col-md-6">
+                <h1>{{ product.product_name }}</h1>
+                <p>{{ product.description }}</p>
+                <p>Price: ₹{{ product.price }}</p>
+                <p>Stock: {{ product.stock }}</p>
+
+                {% if request.user.user_type == 'Buyer' %}
+                <form method="post" action="{% url 'add_to_cart' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                </form>
+                {% endif %}
+                {% comment %} <button class="btn btn-primary">Add to Cart</button> {% endcomment %}
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ========================= PRODUCT DETAILS END ========================= -->
+
+{% comment %} {% endblock body_content %} {% endcomment %}
 
 
 

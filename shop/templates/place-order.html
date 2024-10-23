@@ -21,7 +21,16 @@
             </div>
             <figcaption class="info">
                 <p>{{ item.product.product_name }}</p>
-                <span class="text-muted">{{ item.product.price }}</span>
+                {% comment %} <span class="text-muted">{{ item.product.price }}</span> {% endcomment %}
+				<td>
+					{% if item.product.discounted_price %}
+						<span style="color: green;">₹{{ item.product.discounted_price }}</span>
+						<small><del>₹{{ item.product.price }}</del></small>
+					{% else %}
+						₹{{ item.product.price }}
+					{% endif %}
+				</td>
+				{% comment %} <td>₹{{ item.total_price }}</td> {% endcomment %}
             </figcaption>
         </figure>
     </div> <!-- col.// -->
