@@ -2,15 +2,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 
-from .views import (ActivateAccountView, AddToCartView, BuyerDashboardView,
-                    BuyerProfileView, CartView, ChangePasswordView,
-                    CreateProductBySellerView, Home, OrderCompleteView,
-                    OrderHistoryView, OrderView, ProductView, QuantityView,
-                    RemoveView, ResetCompleteView, ResetConfirmView,
-                    ResetDoneView, ResetPasswordView, SellerDashboardView,
-                    SellerProductsView, SellerProfileView, SignUpView,
-                    StoreView, SuccessView, UpdateSellerProductView,
-                    UserLoginView, UserLogoutView, ApplyDiscountView)
+from .views import (ActivateAccountView, AddToCartView, ApplyDiscountView,
+                    BuyerDashboardView, BuyerProfileView, CartView,
+                    ChangePasswordView, CreateProductBySellerView, Home,
+                    OrderCompleteView, OrderHistoryView, OrderView,
+                    ProductView, QuantityView, RemoveView, ResetCompleteView,
+                    ResetConfirmView, ResetDoneView, ResetPasswordView,
+                    SellerDashboardView, SellerProductsView, SellerProfileView,
+                    SignUpView, StoreView, SuccessView,
+                    UpdateSellerProductView, UserLoginView, UserLogoutView)
 
 urlpatterns = [
     path("", Home.as_view(), name="home"),
@@ -74,7 +74,9 @@ urlpatterns = [
     path(
         "changepassword/", ChangePasswordView.as_view(), name="change_password"
     ),
-    path('apply-discount/', ApplyDiscountView.as_view(), name='apply_discount'),
+    path(
+        "apply-discount/", ApplyDiscountView.as_view(), name="apply_discount"
+    ),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
