@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load socialaccount %}
 {% block body_content %}
 <!-- ========================= SECTION CONTENT ========================= -->
 <section class="section-content padding-y" style="min-height:84vh; background: linear-gradient(135deg, #4A90E2, #50E3C2);">
@@ -29,6 +30,9 @@
         </article><!-- card-body.// -->
     </div> <!-- card .// -->
     <p class="text-center mt-4">Already have an account? <a href="{% url 'login' %}">Log In</a></p>
+    <p class="text-center mt-4">
+        Or Sign Up with Google <a href="{% provider_login_url 'google' %}?next=/">Log In</a>
+    </p>
     <br><br>
     <!-- ============================ COMPONENT REGISTER END.// ================================= -->
 
