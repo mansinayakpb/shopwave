@@ -814,3 +814,4 @@ class ApplyDiscountView(TemplateView):
             return redirect("store")                 
 
         return self.render_to_response({"form": form})
+
