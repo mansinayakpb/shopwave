@@ -4,13 +4,14 @@ from django.urls import path
 
 from .views import (ActivateAccountView, AddToCartView, ApplyDiscountView,
                     BuyerDashboardView, BuyerProfileView, CartView,
-                    ChangePasswordView, CreateProductBySellerView, Home,
-                    OrderCompleteView, OrderHistoryView, OrderView,
-                    ProductView, QuantityView, RemoveView, ResetCompleteView,
-                    ResetConfirmView, ResetDoneView, ResetPasswordView,
-                    SellerDashboardView, SellerProductsView, SellerProfileView,
-                    SignUpView, StoreView, SuccessView,
-                    UpdateSellerProductView, UserLoginView, UserLogoutView)
+                    ChangePasswordView, CreateProductBySellerView,
+                    Home, OrderCompleteView,
+                    OrderHistoryView, OrderView, ProductView, QuantityView,
+                    RemoveView, ResetCompleteView, ResetConfirmView,
+                    ResetDoneView, ResetPasswordView, SellerDashboardView,
+                    SellerProductsView, SellerProfileView, SignUpView,
+                    StoreView, SuccessView, UpdateSellerProductView,
+                    UserLoginView, UserLogoutView)
 
 urlpatterns = [
     path("", Home.as_view(), name="home"),
@@ -30,6 +31,7 @@ urlpatterns = [
     path("signup/", SignUpView.as_view(), name="signup"),
     path("login/", UserLoginView.as_view(), name="login"),
     path("logout/", UserLogoutView.as_view(), name="logout"),
+    # path("googlelogout/", GoogleLogoutView.as_view(), name="Google"),
     path("buyer/profile/", BuyerProfileView.as_view(), name="buyer_profile"),
     path("OrderHistory/", OrderHistoryView.as_view(), name="Order_History"),
     path(
