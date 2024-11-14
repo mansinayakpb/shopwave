@@ -35,7 +35,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    'https://6ddf-2405-201-3027-e01e-fbf2-e59b-f19f-7bf2.ngrok-free.app',
+]
 
 
 # Application definition
@@ -76,6 +80,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "shop.middleware.AutoLogoutMiddleware",
 ]
 
 ROOT_URLCONF = "shopwave.urls"
@@ -176,6 +181,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "nayak.mansi09@gmail.com"
 EMAIL_HOST_PASSWORD = "sbdn esrx mhvj ckkg"
+# DEFAULT_FROM_EMAIL = "nayak.mansi09@gmail.com"
 
 
 AUTHENTICATION_BACKENDS = (
@@ -191,3 +197,10 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False         
 ACCOUNT_AUTHENTICATION_METHOD = 'email'   
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Set session to expire when the user closes the browser
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Optionally, set a session timeout (in seconds)
+SESSION_COOKIE_AGE = 60  # 3 minutes
+AUTO_LOGOUT_ENABLED = True  # Set to False to disable auto logout
