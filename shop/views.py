@@ -88,6 +88,47 @@ class UserLoginView(TemplateView):
             messages.error(request, "Invalid username or password")
 
         return render(request, self.template_name, {"form": form})
+    
+
+# class UserLoginView(TemplateView):
+#     template_name = "signin/login.html"
+
+#     def get(self, request):
+#         if request.user.is_authenticated:
+#             return redirect("/")
+#         form = AuthenticationForm()
+#         return render(request, self.template_name, {"form": form})
+    
+#     def post(self, request):
+#         form = AuthenticationForm(request=request, data=request.POST)
+#         if not form.is_valid():
+#             messages.error(request, "Invalid username or password")
+#             return render(request, self.template_name, {"form": form})
+        
+#         user_name = form.cleaned_data["username"]
+#         user_password = form.cleaned_data["password"]
+#         user = authenticate(username=user_name, password=user_password)
+
+#         if not user:
+#             form.add_error(None, "Invalid username or password")
+#             return render(request, self.template_name, {"form": form})
+        
+#         if not user.email_verified:
+#             if user.is_token_valid():
+#                 login(request, user)
+#                 messages.success(request, "Logged in Successfully!!")
+#                 return redirect("/")
+#             user.generate_verification_code()
+#             send_verification_email(user, request)
+#             messages.error(
+#                 request,
+#                 "Your email verification link haas expired. A new verification link has been sent to your email.",
+#             )
+#             return redirect("login")
+        
+#         login(request, user)
+#         messages.success(request, "LOgged in Successfully!!")
+#         return redirect("/")
 
 
 class ActivateAccountView(TemplateView):
@@ -149,7 +190,7 @@ class BuyerProfileView(LoginRequiredMixin, TemplateView):
         context = {"form": form, "form_action": "buyer"}
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         buyer_profile = Profile.objects.filter(user=request.user).first()
         buyer_form = BuyerForm(data=request.POST, instance=buyer_profile)
         if buyer_form.is_valid():
