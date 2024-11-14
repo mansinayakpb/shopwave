@@ -70,8 +70,8 @@ urlpatterns = [
     # Forgot password
     path("passwordreset/", ResetPasswordView.as_view(), name="password_reset"),
     path("resetdone/", ResetDoneView.as_view(), name="reset_done"),
-    path("resetconfirm/", ResetConfirmView.as_view(), name="reset_confirm"),
-    path("resetcomplete/", ResetCompleteView.as_view(), name="reset_complete"),
+    path("resetconfirm/<uidb64>/<token>/", ResetConfirmView.as_view(), name="reset_confirm"),
+    path("resetcomplete/", ResetCompleteView.as_view(), name="reset_complete"),    
     # Change password
     path(
         "changepassword/", ChangePasswordView.as_view(), name="change_password"
