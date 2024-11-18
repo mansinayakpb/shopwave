@@ -2,15 +2,37 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 
-from .views import (ActivateAccountView, AddToCartView, ApplyDiscountView,
-                    BuyerDashboardView, BuyerProfileView, CartView,
-                    ChangePasswordView, CreateProductBySellerView, Home,
-                    OrderCompleteView, OrderHistoryView, OrderView,
-                    ProductView, QuantityView, RemoveView, ResetCompleteView,
-                    ResetConfirmView, ResetDoneView, ResetPasswordView,
-                    SellerDashboardView, SellerProductsView, SellerProfileView,
-                    SignUpView, StoreView, SuccessView,
-                    UpdateSellerProductView, UserLoginView, UserLogoutView)
+from .views import (
+    ActivateAccountView,
+    AddToCartView,
+    ApplyDiscountView,
+    BuyerDashboardView,
+    BuyerProfileView,
+    CartView,
+    ChangePasswordView,
+    CreateProductBySellerView,
+    Home,
+    OrderCompleteView,
+    OrderHistoryView,
+    OrderView,
+    ProductView,
+    QuantityView,
+    RemoveView,
+    ResetCompleteView,
+    ResetConfirmView,
+    ResetDoneView,
+    ResetPasswordView,
+    SellerDashboardView,
+    SellerProductsView,
+    SellerProfileView,
+    SignUpView,
+    StoreView,
+    StripeWebhookView,
+    SuccessView,
+    UpdateSellerProductView,
+    UserLoginView,
+    UserLogoutView,
+)
 
 urlpatterns = [
     path("", Home.as_view(), name="home"),
@@ -26,6 +48,11 @@ urlpatterns = [
     ),
     path("cart/placeorder/", OrderView.as_view(), name="order_place"),
     # path("success/", SuccessView.as_view(), name="success"),
+    path(
+        "cart/stripe-webhook/",
+        StripeWebhookView.as_view(),
+        name="stripe_webhook",
+    ),
     path("OrderComplete/", OrderCompleteView.as_view(), name="Order_Complete"),
     path("signup/", SignUpView.as_view(), name="signup"),
     path("login/", UserLoginView.as_view(), name="login"),
