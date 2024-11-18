@@ -6,16 +6,31 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, View
 
 from .email_utils import send_verification_email
-from .forms import (BuyerForm, DiscountForm, SellerDashboardForm, SellerForm,
-                    SignUpForm)
-from .models import (Cart, CartItem, Category, Order, OrderItem, Payment,
-                     Product, Profile, User)
+from .forms import (
+    BuyerForm,
+    DiscountForm,
+    SellerDashboardForm,
+    SellerForm,
+    SignUpForm,
+)
+from .models import (
+    Cart,
+    CartItem,
+    Category,
+    Order,
+    OrderItem,
+    Payment,
+    Product,
+    Profile,
+    User,
+)
 
 # **************************************Authentication*****************************************************
 
@@ -599,6 +614,7 @@ class OrderView(TemplateView):
             )
             return redirect("login")
 
+        # Retrieve cart and cart items
         cart = Cart.objects.filter(buyer=request.user).first()
         if not cart:
             messages.error(request, "No cart found for user")
@@ -613,10 +629,7 @@ class OrderView(TemplateView):
         total_price = 0.0
         tax_rate = 0.10
         for item in cart_items:
-            if item.product.discounted_price is not None:
-                item_price = item.product.discounted_price
-            else:
-                item_price = item.product.price
+            item_price = item.product.discounted_price or item.product.price
             item.total_price = float(item_price) * float(item.quantity)
             total_price += item.total_price
 
@@ -643,35 +656,44 @@ class OrderView(TemplateView):
         cart = Cart.objects.filter(buyer=request.user).first()
         cart_items = CartItem.objects.filter(cart=cart)
 
+        if not cart_items:
+            messages.error(request, "Your cart is empty")
+            return redirect("cart_view")
+
         total_price = 0.0
         tax_rate = 0.10
         for item in cart_items:
-            if item.product.discounted_price is not None:
-                item_price = item.product.discounted_price
-            else:
-                item_price = item.product.price
+            item_price = item.product.discounted_price or item.product.price
             item.total_price = float(item_price) * float(item.quantity)
             total_price += item.total_price
 
         tax = total_price * tax_rate
         final_total = total_price + tax
 
-        # Create the order
-        order = Order.objects.create(
-            buyer=request.user,
-            total_price=final_total,
-            is_paid=False,
-        )
-
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.product.price,
+        with transaction.atomic():
+            # Create the order without deleting cart items
+            order = Order.objects.create(
+                buyer=request.user,
+                total_price=final_total,
+                is_paid=False,
             )
 
-            cart_items.delete()
+            for item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    price=item.product.price,
+                )
+
+            # Create a Payment record with pending status
+            payment = Payment.objects.create(
+                user=request.user,
+                order=order,
+                amount=final_total,
+                payment_method="stripe",
+                payment_status="pending",
+            )
 
             # Stripe payment setup
             stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -679,6 +701,7 @@ class OrderView(TemplateView):
                 request.build_absolute_uri(reverse("success"))
                 + f"?order_id={order.id}"
             )
+            cancel_url = request.build_absolute_uri(reverse("cart_view"))
 
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
@@ -686,9 +709,7 @@ class OrderView(TemplateView):
                     {
                         "price_data": {
                             "currency": "inr",
-                            "product_data": {
-                                "name": f"Order {order.id}",
-                            },
+                            "product_data": {"name": f"Order {order.id}"},
                             "unit_amount": int(final_total * 100),
                         },
                         "quantity": 1,
@@ -696,18 +717,12 @@ class OrderView(TemplateView):
                 ],
                 mode="payment",
                 success_url=success_url,
-                # cancel_url=cancel_url,
+                cancel_url=cancel_url,
             )
 
-            # Create a Payment record
-            Payment.objects.create(
-                user=request.user,
-                order=order,
-                amount=final_total,
-                payment_method="stripe",
-                payment_status="pending",
-                transaction_id=checkout_session.id,
-            )
+            # Save the Stripe session ID for tracking
+            payment.transaction_id = checkout_session.id
+            payment.save()
 
         return redirect(checkout_session.url, code=303)
 
@@ -740,12 +755,25 @@ class StripeWebhookView(View):
 
             if stripe_payment_id and payment_intent:
                 payment = Payment.objects.filter(
-                    stripe_id=stripe_payment_id
+                    transaction_id=stripe_payment_id
                 ).first()
+
                 if payment:
-                    payment.payment_status = "successful"
-                    payment.transaction_id = payment_intent
-                    payment.save()
+                    with transaction.atomic():
+                        # Mark payment as successful
+                        payment.payment_status = "successful"
+                        payment.transaction_id = payment_intent
+                        payment.save()
+
+                        # Mark the associated order as paid
+                        order = payment.order
+                        order.is_paid = True
+                        order.save()
+
+                        # Delete cart items after successful payment
+                        cart = Cart.objects.filter(buyer=payment.user).first()
+                        if cart:
+                            CartItem.objects.filter(cart=cart).delete()
 
         return JsonResponse({"status": "success"}, status=200)
 
