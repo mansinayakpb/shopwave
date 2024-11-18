@@ -4,14 +4,13 @@ from django.urls import path
 
 from .views import (ActivateAccountView, AddToCartView, ApplyDiscountView,
                     BuyerDashboardView, BuyerProfileView, CartView,
-                    ChangePasswordView, CreateProductBySellerView,
-                    Home, OrderCompleteView,
-                    OrderHistoryView, OrderView, ProductView, QuantityView,
-                    RemoveView, ResetCompleteView, ResetConfirmView,
-                    ResetDoneView, ResetPasswordView, SellerDashboardView,
-                    SellerProductsView, SellerProfileView, SignUpView,
-                    StoreView, SuccessView, UpdateSellerProductView,
-                    UserLoginView, UserLogoutView)
+                    ChangePasswordView, CreateProductBySellerView, Home,
+                    OrderCompleteView, OrderHistoryView, OrderView,
+                    ProductView, QuantityView, RemoveView, ResetCompleteView,
+                    ResetConfirmView, ResetDoneView, ResetPasswordView,
+                    SellerDashboardView, SellerProductsView, SellerProfileView,
+                    SignUpView, StoreView, SuccessView,
+                    UpdateSellerProductView, UserLoginView, UserLogoutView)
 
 urlpatterns = [
     path("", Home.as_view(), name="home"),
@@ -70,8 +69,12 @@ urlpatterns = [
     # Forgot password
     path("passwordreset/", ResetPasswordView.as_view(), name="password_reset"),
     path("resetdone/", ResetDoneView.as_view(), name="reset_done"),
-    path("resetconfirm/<uidb64>/<token>/", ResetConfirmView.as_view(), name="reset_confirm"),
-    path("resetcomplete/", ResetCompleteView.as_view(), name="reset_complete"),    
+    path(
+        "resetconfirm/<uidb64>/<token>/",
+        ResetConfirmView.as_view(),
+        name="reset_confirm",
+    ),
+    path("resetcomplete/", ResetCompleteView.as_view(), name="reset_complete"),
     # Change password
     path(
         "changepassword/", ChangePasswordView.as_view(), name="change_password"
