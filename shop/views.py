@@ -88,7 +88,7 @@ class UserLoginView(TemplateView):
             messages.error(request, "Invalid username or password")
 
         return render(request, self.template_name, {"form": form})
-    
+
 
 # class UserLoginView(TemplateView):
 #     template_name = "signin/login.html"
@@ -98,13 +98,13 @@ class UserLoginView(TemplateView):
 #             return redirect("/")
 #         form = AuthenticationForm()
 #         return render(request, self.template_name, {"form": form})
-    
+
 #     def post(self, request):
 #         form = AuthenticationForm(request=request, data=request.POST)
 #         if not form.is_valid():
 #             messages.error(request, "Invalid username or password")
 #             return render(request, self.template_name, {"form": form})
-        
+
 #         user_name = form.cleaned_data["username"]
 #         user_password = form.cleaned_data["password"]
 #         user = authenticate(username=user_name, password=user_password)
@@ -112,7 +112,7 @@ class UserLoginView(TemplateView):
 #         if not user:
 #             form.add_error(None, "Invalid username or password")
 #             return render(request, self.template_name, {"form": form})
-        
+
 #         if not user.email_verified:
 #             if user.is_token_valid():
 #                 login(request, user)
@@ -125,7 +125,7 @@ class UserLoginView(TemplateView):
 #                 "Your email verification link haas expired. A new verification link has been sent to your email.",
 #             )
 #             return redirect("login")
-        
+
 #         login(request, user)
 #         messages.success(request, "LOgged in Successfully!!")
 #         return redirect("/")
@@ -671,43 +671,43 @@ class OrderView(TemplateView):
                 price=item.product.price,
             )
 
-        cart_items.delete()
+            cart_items.delete()
 
-        # Stripe payment setup
-        stripe.api_key = settings.STRIPE_SECRET_KEY
-        success_url = (
-            request.build_absolute_uri(reverse("success"))
-            + f"?order_id={order.id}"
-        )
+            # Stripe payment setup
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            success_url = (
+                request.build_absolute_uri(reverse("success"))
+                + f"?order_id={order.id}"
+            )
 
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=[
-                {
-                    "price_data": {
-                        "currency": "inr",
-                        "product_data": {
-                            "name": f"Order {order.id}",
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "inr",
+                            "product_data": {
+                                "name": f"Order {order.id}",
+                            },
+                            "unit_amount": int(final_total * 100),
                         },
-                        "unit_amount": int(final_total * 100),
-                    },
-                    "quantity": 1,
-                }
-            ],
-            mode="payment",
-            success_url=success_url,
-            # cancel_url=cancel_url,
-        )
+                        "quantity": 1,
+                    }
+                ],
+                mode="payment",
+                success_url=success_url,
+                # cancel_url=cancel_url,
+            )
 
-        # Create a Payment record
-        Payment.objects.create(
-            user=request.user,
-            order=order,
-            amount=final_total,
-            payment_method="stripe",
-            payment_status="pending",
-            transaction_id=checkout_session.id,
-        )
+            # Create a Payment record
+            Payment.objects.create(
+                user=request.user,
+                order=order,
+                amount=final_total,
+                payment_method="stripe",
+                payment_status="pending",
+                transaction_id=checkout_session.id,
+            )
 
         return redirect(checkout_session.url, code=303)
 
@@ -841,8 +841,8 @@ class ApplyDiscountView(TemplateView):
             if categories:
                 products = Product.objects.filter(category=categories)
                 print(products)
-            else:        
-            
+            else:
+
                 # Apply discount to all products
                 products = Product.objects.all()
             for product in products:
@@ -852,7 +852,6 @@ class ApplyDiscountView(TemplateView):
                 product.save()
 
             messages.success(request, "Discount applied to all products.")
-            return redirect("store")                 
+            return redirect("store")
 
         return self.render_to_response({"form": form})
-
