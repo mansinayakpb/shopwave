@@ -204,3 +204,4 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # Optionally, set a session timeout (in seconds)
 SESSION_COOKIE_AGE = 60  # 3 minutes
 AUTO_LOGOUT_ENABLED = True  # Set to False to disable auto logout
+
