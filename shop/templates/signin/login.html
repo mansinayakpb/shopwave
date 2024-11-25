@@ -1,36 +1,47 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load socialaccount %}
 {% block body_content %}
-<!-- ========================= SECTION CONTENT ========================= -->
-<section class="section-content padding-y" style="min-height:84vh; background: linear-gradient(135deg, #f06, #f93);">
 
-    <!-- ============================ COMPONENT REGISTER ================================= -->
-    <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
-        <article class="card-body">
-            <header class="mb-4"><h4 class="card-title">Sign In</h4></header>
-            <form method="post" action="{% url 'login' %}">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-block">Login</button>
-                        <a href="{% url 'password_reset' %}">Forgot Password</a>
-                </div>
-            </form>
-            {% if messages %}
-                {% for message in messages %}
-                    <p class="{{ message.tags }}">{{ message }}</p>
-                {% endfor %}
-            {% endif %}
-        </article><!-- card-body.// -->
-    </div> <!-- card .// -->
-    <p class="text-center mt-4">Don't have an account? <a href="{% url 'signup' %}">Register</a></p>
+<!-- Background Section -->
+<section class="site-hero overlay" 
+         style="background-image: url({% static 'images/items/17.jpg' %}); 
+                min-height: 84vh; 
+                background-size: cover; 
+                background-position: center center; 
+                background-repeat: no-repeat;" 
+         data-stellar-background-ratio="0.5">
 
-    
-    
-    <br><br>
-    <!-- ============================ COMPONENT REGISTER END.// ================================= -->
+    <!-- Centered Sign-In Form -->
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 84vh;">
+        <div class="card mx-auto" 
+             style="max-width:520px; background-color: rgba(255, 255, 255, 0.8); 
+                    border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); padding: 20px;">
+            <article class="card-body" style="color: black;">
+                <header class="mb-4">
+                    <h4 class="card-title text-center">Sign In</h4>
+                </header>
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+                        <a href="{% url 'password_reset' %}" class="d-block text-center mt-2" style="color: blue;">Forgot Password?</a>
+                        <p class="text-center mt-4">Don't have an account? <a href="{% url 'signup' %}" style="color: blue;">Register</a></p>
+                    </div>
+                </form>
+                {% if messages %}
+                    {% for message in messages %}
+                        <p class="text-center {{ message.tags }}">{{ message }}</p>
+                    {% endfor %}
+                        
 
+                {% endif %}
+            </article>
+        </div>
+    </div>
 </section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
+
+<!-- Footer Section -->
+
+
 {% endblock %}
