@@ -13,24 +13,10 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, View
 
 from .email_utils import send_verification_email
-from .forms import (
-    BuyerForm,
-    DiscountForm,
-    SellerDashboardForm,
-    SellerForm,
-    SignUpForm,
-)
-from .models import (
-    Cart,
-    CartItem,
-    Category,
-    Order,
-    OrderItem,
-    Payment,
-    Product,
-    Profile,
-    User,
-)
+from .forms import (BuyerForm, DiscountForm, SellerDashboardForm, SellerForm,
+                    SignUpForm)
+from .models import (Cart, CartItem, Category, Order, OrderItem, Payment,
+                     Product, Profile, User)
 
 # **************************************Authentication*****************************************************
 
@@ -603,7 +589,6 @@ class OrderHistoryView(TemplateView):
 
 # ************************************Payment************************************************************
 
-
 class OrderView(TemplateView):
     template_name = "place-order.html"
 
@@ -697,10 +682,7 @@ class OrderView(TemplateView):
 
             # Stripe payment setup
             stripe.api_key = settings.STRIPE_SECRET_KEY
-            success_url = (
-                request.build_absolute_uri(reverse("success"))
-                + f"?order_id={order.id}"
-            )
+            success_url = request.build_absolute_uri(reverse("success")) + f"?order_id={order.id}"
             cancel_url = request.build_absolute_uri(reverse("cart_view"))
 
             checkout_session = stripe.checkout.Session.create(
