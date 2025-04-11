@@ -1,0 +1,64 @@
+{% extends "seller/base_seller.html" %}
+{% load static %}
+{% block body_content %}
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-content padding-y bg">
+
+<div class="container">
+    <div class="row">
+        <aside class="col-md-3">
+            <!--   SIDEBAR   -->
+            <ul class="list-group">
+                <a class="list-group-item" href="{% url 'createproduct_seller' %}">Create a Product</a>
+                <a class="list-group-item active" href="{% url 'myproducts_seller' %}">My Products</a>
+                <a class="list-group-item" href="{% url 'seller_profile' %}">Profile</a>
+                <a class="list-group-item" href="#">Received orders</a>
+                <a class="list-group-item" href="#">Transactions</a>
+                <a class="list-group-item" href="#">Settings</a>
+            </ul>
+            <br>
+            <a class="btn btn-light btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a>
+            <!--   SIDEBAR .//END   -->
+        </aside>
+        <main class="col-md-9">
+            <!-- Seller-specific content -->
+            <article class="card">
+                <header class="card-header">
+                    <strong class="d-inline-block mr-3">My Products</strong>
+                </header>
+                <div class="card-body">
+                    <!-- Display success or error messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Products listing -->
+                    {% if products %}
+                    <ul class="list-group">
+                        {% for product in products %}
+                            <li class="list-group-item">
+                                <a href="{% url 'updateproduct_seller' product.id %}" class="btn btn-primary">Edit Product</a>
+                                <h5>{{ product.product_name }}</h5>
+                                <p>Price: ₹{{ product.price }}</p>
+                                <p>Stock: {{ product.stock }}</p>
+                                <p>Description: {{ product.description }}</p>
+                                <img src="{{ product.image.url }}" alt="{{ product.product_name }}" class="img-fluid" width=150px/>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                            <br>
+                    {% else %}
+                        <p>No products found.</p>
+                    {% endif %}
+                </div>
+            </article>
+        </main>
+    </div> <!-- row.// -->
+</div>
+
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+
+{% endblock body_content %}

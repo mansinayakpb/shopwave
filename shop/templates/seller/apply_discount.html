@@ -1,0 +1,14 @@
+{% extends "seller/base_seller.html" %}
+{% load static %}
+{% block body_content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <h2>Apply Discount</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}  <!-- Renders the form fields -->
+            <button type="submit" class="btn btn-primary">Apply Discount</button>
+        </form>
+    </div>
+</section>
+{% endblock body_content %}

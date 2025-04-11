@@ -1,0 +1,56 @@
+{% extends "seller/base_seller.html" %}
+{% load static %}
+{% block body_content %}
+<section class="section-content padding-y bg">
+<div class="container">
+    <div class="row">
+        <aside class="col-md-3">
+            <ul class="list-group">
+                <a class="list-group-item active" href="{% url 'createproduct_seller' %}">Create a Product</a>
+                <a class="list-group-item" href="{% url 'myproducts_seller' %}">My Products</a>
+                <a class="list-group-item" href="{% url 'seller_profile' %}">Profile</a>
+                <a class="list-group-item" href="#">Received orders</a>
+                <a class="list-group-item" href="#">Transactions</a>
+                <a class="list-group-item" href="#">Settings</a>
+            </ul>
+            <br>
+            <a class="btn btn-light btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a>
+        </aside>
+        <main class="col-md-9">
+            <article class="card">
+                <header class="card-header">
+                    <strong class="d-inline-block mr-3">
+                        {% if product %}
+                            Edit Product
+                        {% else %}
+                            Create Product
+                        {% endif %}
+                    </strong>
+                </header>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">
+                            {% if product %}
+                                Save Changes
+                            {% else %}
+                                Create Product
+                            {% endif %}
+                        </button>
+                    </form>
+                    <br>
+                    <a href="{% url 'myproducts_seller' %}" class="btn btn-secondary mt-3">Back to Products</a>
+                </div>
+            </article>
+        </main>
+    </div>
+</div>
+</section>
+{% endblock body_content %}
